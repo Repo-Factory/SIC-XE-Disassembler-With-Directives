@@ -1,0 +1,13 @@
+INSTR   FORMAT   OAT   TAAM   OBJ
+LDB      4      Immediate      Absolute      691002C6
+STL      3      Simple      PC      1722BF
+LDA      3      Indirect      PC      022FFF
+CLEAR      2              B400
+SIO      3      Immediate      Absolute      F10500
+LDA      3      Simple      Absolute      000100
+LDX      3      Immediate      Absolute      050000
+LDA      3      Immediate      _Indexed      01E32F
+TIO      4      Indirect      PC      FA332FFA
+LDCH      3      Simple      PC_Indexed      53AFEA
+WD      3      Simple      PC      DF2FEA
+LDA      4      Simple      Absolute      031002E3
