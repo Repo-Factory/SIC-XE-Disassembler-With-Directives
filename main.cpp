@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
     const std::function<void(int, int)> recurseTextSection ([&](const int textBytes, const int LOCCTR) {  // While there are still bytes, extract them
         if (STILL_MORE_BYTES(textBytes)) {
            const int bytesUsed = extractInfoToOutput(inputFile, outputFile, parser);
-           std::cout << LOCCTR << std::endl;
+           std::cout << LOCCTR << std::hex << std::endl;
            recurseTextSection(textBytes-bytesUsed, LOCCTR + bytesUsed);
         }
     });

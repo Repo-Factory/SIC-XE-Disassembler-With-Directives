@@ -6,8 +6,8 @@ CXX=g++
 CXXFLAGS=-std=c++11 -Wall -g3 -c
 
 # object files
-OBJS = byte_operations.o input_handler.o instructions.o output_handler.o parser.o  main.o
-HEADERS = byte_operations.hpp input_handler.hpp instructions.hpp output_handler.hpp parser.hpp
+OBJS = byte_operations.o input_handler.o instructions.o output_handler.o parser.o  main.o symbol_table.o
+HEADERS = byte_operations.hpp input_handler.hpp instructions.hpp output_handler.hpp parser.hpp symbol_table.hpp
 # Program name
 PROGRAM = disassem
 
@@ -32,6 +32,9 @@ instructions.o : instructions.hpp instructions.cpp
 	
 output_handler.o : output_handler.hpp output_handler.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) output_handler.cpp
+
+symbol_table.o : symbol_table.hpp symbol_table.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDE) symbol_table.cpp
 
 parser.o : parser.hpp parser.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDE) parser.cpp

@@ -41,10 +41,10 @@ char convertFromHexToChar(int hex)
 }
 
 /* This will take some characters read in and prepare them for masking. */
-Byte convertStringToHex(const std::string& byteChars) // Accepts two chars
+int convertStringToHex(const std::string& byteChars) // Accepts two chars
 {
     const char* c_word = byteChars.c_str();
-    Byte bitStream = INIT_BIT_STREAM;
+    int bitStream = INIT_BIT_STREAM;
     while (*c_word != STRING_END_CHAR) {    // Overlay four bits of each char into our 8 bit bitstream
         bitStream = (bitStream << FOUR_BITS) | convertFromCharToHex(*c_word++);
     }
@@ -52,36 +52,36 @@ Byte convertStringToHex(const std::string& byteChars) // Accepts two chars
 }
 
 /* Split byte into two chars and concatanate them to make our string */
-std::string convertHexToString(const Byte byte)
+std::string convertHexToString(const int byte)
 {
     return std::string() + 
     convertFromHexToChar((byte & FIRST_4_BITS_MASK) >> FOUR_BITS) + 
-    convertFromHexToChar( byte & SECOND_4_BITS_MASK >> ZERO_BITS);
+    convertFromHexToChar( byte & SECOND_4_BITS_MASK >> ZERO_BITS);    
 }
 
 /* opcode | nixbpe | address */
 
-Byte extractOpCode(const Byte byte) // Pass in first two hex digits 
+int extractOpCode(const int byte) // Pass in first two hex digits 
 {
     return byte & OPCODE_MASK; // Get first six bits of first 8 bits
 }
 
-Byte extract_ni_flags(const Byte byte) // Pass in first two hex digits 
+int extract_ni_flags(const int byte) // Pass in first two hex digits 
 {
     return byte & NI_MASK;      // Get last two bits of first 8 bits
 }
 
-Byte extract_x_flag(const Byte byte) // Pass in first two hex digits
+int extract_x_flag(const int byte) // Pass in first two hex digits
 {
     return (byte & X_MASK) >> THREE_BITS;   // Get first bit of second hex digit, then shift it to return 0 or 1
 }
 
-Byte extract_bp_flags(const Byte byte) // Pass in last two hex digits
+int extract_bp_flags(const int byte) // Pass in last two hex digits
 {
     return (byte & BP_MASK) >> ONE_BIT; // Get middle two bits of last hex digit then shift to shave off e bit
 }
 
-Byte extract_e_flag(const Byte byte) // Pass in last two hex digits
+int extract_e_flag(const int byte) // Pass in last two hex digits
 {
     return byte & E_FLAG_MASK;  // get last bit of second hex digit, returns 0 or 1
 }

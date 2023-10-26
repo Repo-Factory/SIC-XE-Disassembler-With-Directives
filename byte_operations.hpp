@@ -3,14 +3,12 @@
 
 #include <string>
 
-typedef unsigned char Byte; // 8 bit positive value
-
-Byte convertStringToHex(const std::string& byteChars);
-std::string convertHexToString(const Byte byte);
-Byte extractOpCode(const Byte byte);
-Byte extract_ni_flags(const Byte byte);
-Byte extract_x_flag(const Byte byte);
-Byte extract_bp_flags(const Byte byte);
-Byte extract_e_flag(const Byte byte);
+int convertStringToHex(const std::string& byteChars);
+std::string convertHexToString(const int byte);
+int extractOpCode(const int byte);
+int extract_ni_flags(const int byte);
+int extract_x_flag(const int byte);
+int extract_bp_flags(const int byte);
+int extract_e_flag(const int byte);
 
 #endif

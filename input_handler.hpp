@@ -8,8 +8,8 @@
 
 struct TextSectionDescriptor
 {
-    uint32_t LOCCTR_START;
-    uint32_t numberBytesReadIn;
+    int LOCCTR_START;
+    int numberBytesReadIn;
 };
 
 namespace FileHandling
