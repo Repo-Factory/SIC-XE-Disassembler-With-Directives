@@ -11,6 +11,17 @@ namespace FileHandling
 }
 
 /* Consolidates our output into a single struct to overload our << operator */
+
+struct ParsedInstruction
+{
+    const std::string opCode;
+    const AddressingFormat format;
+    const AddressingMode addresingMode;
+    const bool isIndexed; 
+    const TargetAddressMode targetAddressMode; 
+    const std::string objectCode;
+};
+
 struct Output
 {
     const std::string LOCCTR;
@@ -20,11 +31,11 @@ struct Output
     const std::string objectCode;
 };
 
-/* const std::string opCode;
-    const AddressingFormat format;
-    const AddressingMode addresingMode;
-    const bool isIndexed; 
-    const TargetAddressMode targetAddressMode; */
+struct ParsingResult
+{
+    const ParsedInstruction instruction;
+    const int bytesReadIn;
+};
 
 /* Wrapper so we can operator overload our bool value */
 struct Indexed

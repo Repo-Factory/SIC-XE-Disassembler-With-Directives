@@ -1,13 +1,13 @@
 000000      Assign      START       0           
 0           0           LDB         0           691002C6    
-0           0           STL         0           1722BF      
-0           0           LDA         0           022FFF      
-0           0           CLEAR       0           B400        
-0           0           SIO         0           F10500      
-0           0           LDA         0           000100      
-0           0           LDX         0           050000      
-0           0           LDA         0           01E32F      
-0           0           TIO         0           FA332FFA    
-0           0           LDCH        0           53AFEA      
-0           0           WD          0           DF2FEA      
-0           0           LDA         0           031002E3    
+4           0           STL         0           1722BF      
+7           0           LDA         0           022FFF      
+711         0           CLEAR       0           B400        
+713         0           SIO         0           F10500      
+716         0           LDA         0           000100      
+719         0           LDX         0           050000      
+722         0           LDA         0           01E32F      
+725         0           TIO         0           FA332FFA    
+729         0           LDCH        0           53AFEA      
+732         0           WD          0           DF2FEA      
+735         0           LDA         0           031002E3    

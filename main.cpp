@@ -19,18 +19,23 @@
 #include <fstream>
 #include <iostream>
 
-#define INPUT_FILE_ARG_NUMBER 1
-#define SYMBOL_FILE_ARG_NUMBER 2
-#define ONE_BYTE 1
-#define PLUS_HALF_BYTE 1
-#define NUMBER_OF_HEX_CHARS_IN_ONE_BYTE 2
-#define HEX_CHARS_IN_STRING(hex_str) hex_str.size()
-#define BYTES_IN_HEX_STRING(hex_str) HEX_CHARS_IN_STRING(hex_str)/NUMBER_OF_HEX_CHARS_IN_ONE_BYTE // Assuming string is a stream of hex chars
-#define STILL_MORE_BYTES(bytes) bytes>0
-#define OUTPUT_FILE_NAME "out.lst"
+const constexpr int INPUT_FILE_ARG_NUMBER = 1;
+const constexpr int SYMBOL_FILE_ARG_NUMBER = 2;
+const constexpr int ONE_BYTE = 1;
+const constexpr int PLUS_HALF_BYTE = 1;
+const constexpr int NUMBER_OF_HEX_CHARS_IN_ONE_BYTE = 2;
+
+const int BYTES_IN_HEX_STRING(const std::string& hex_str) {
+    return hex_str.size() / NUMBER_OF_HEX_CHARS_IN_ONE_BYTE;
+}
+const constexpr bool STILL_MORE_BYTES(int bytes) {
+    return bytes > 0;
+}
+const constexpr char* OUTPUT_FILE_NAME = "out.lst";
+
 
 /* Call our parser for all our info, print it, and return how many bytes we traversed */
-int extractInfoToOutput(std::ifstream& inputFile, std::ofstream& outputFile, const std::unique_ptr<Parser>& parser)
+ParsingResult parseInstruction(std::ifstream& inputFile, const std::unique_ptr<Parser>& parser)
 {
     const std::string firstTwelveBits =           FileHandling::readInBytes(inputFile, ONE_BYTE, PLUS_HALF_BYTE);
     const std::string opCode =                    parser->determineOpCode(firstTwelveBits);
@@ -39,15 +44,14 @@ int extractInfoToOutput(std::ifstream& inputFile, std::ofstream& outputFile, con
     const bool isIndexed =                        parser->isIndexed(firstTwelveBits);
     const TargetAddressMode targetAddressMode =   parser->determineTargetAddressMode(firstTwelveBits);
     const std::string fullInstruction =           parser->readInFullInstruction(inputFile, firstTwelveBits, format);
-    
-    outputFile <<                                 Output{"0", "0", opCode, "0", fullInstruction};
-    return BYTES_IN_HEX_STRING(fullInstruction);  // Return the total number of bytes traversed
+    const ParsedInstruction parsedInstruction     {opCode, format, addresingMode, isIndexed, targetAddressMode, fullInstruction};
+    return ParsingResult                          {parsedInstruction, BYTES_IN_HEX_STRING(fullInstruction)} ;  // Return the total number of bytes traversed
 }
 
-// void generateOutput(const uint32_t LOCCTR, )
-// {
-
-// }
+void generateOutput(const uint32_t LOCCTR, const ParsedInstruction instructionInfo, std::ofstream& outputFile)
+{
+    outputFile << Output{std::to_string(LOCCTR), "0", instructionInfo.opCode, "0", instructionInfo.objectCode};
+}
 
 // Set up input/output files and traverse input instructions
 int main(int argc, char* argv[])
@@ -63,16 +67,16 @@ int main(int argc, char* argv[])
 
     const std::function<void(int, int)> recurseTextSection ([&](const int textBytes, const int LOCCTR) {  // While there are still bytes, extract them
         if (STILL_MORE_BYTES(textBytes)) {
-           const int bytesUsed = extractInfoToOutput(inputFile, outputFile, parser);
-           std::cout << LOCCTR << std::hex << std::endl;
-           recurseTextSection(textBytes-bytesUsed, LOCCTR + bytesUsed);
+            const ParsingResult parseResult = parseInstruction(inputFile, parser);
+            generateOutput(LOCCTR, parseResult.instruction, outputFile);           
+            recurseTextSection(textBytes-parseResult.bytesReadIn, LOCCTR+parseResult.bytesReadIn);
         }
     });
 
     while (!inputFile.eof()) {
         const TextSectionDescriptor descriptor = FileHandling::locateTextSection(inputFile); 
         recurseTextSection(descriptor.numberBytesReadIn, descriptor.LOCCTR_START);  
-    } // Here we will actually call our lambda, which will execute bulk of program
+    }   // Here we will actually call our lambda, which will execute bulk of program
     return FileHandling::close(inputFile, outputFile); 
 }
 
