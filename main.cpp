@@ -39,24 +39,44 @@ int extractInfoToOutput(std::ifstream& inputFile, std::ofstream& outputFile, con
     const bool isIndexed =                        parser->isIndexed(firstTwelveBits);
     const TargetAddressMode targetAddressMode =   parser->determineTargetAddressMode(firstTwelveBits);
     const std::string fullInstruction =           parser->readInFullInstruction(inputFile, firstTwelveBits, format);
-    // outputFile <<                                 Output{opCode, format, addresingMode, isIndexed, targetAddressMode, fullInstruction};
+    
+    outputFile <<                                 Output{"0", "0", opCode, "0", fullInstruction};
     return BYTES_IN_HEX_STRING(fullInstruction);  // Return the total number of bytes traversed
 }
+
+// void generateOutput(const uint32_t LOCCTR, )
+// {
+
+// }
 
 // Set up input/output files and traverse input instructions
 int main(int argc, char* argv[])
 {
     std::ifstream inputFile = FileHandling::openFile(argv[INPUT_FILE_ARG_NUMBER]);
-    const SymbolTable symbolFile = FileHandling::readSymbolTableFile(argv[SYMBOL_FILE_ARG_NUMBER]);
-    // for (auto s : symbolFile.SYMTAB) std::cout << s.symbol << std::endl;
-    // for (auto s : symbolFile.LITTAB) std::cout << s.name << std::endl;
-
     std::ofstream outputFile(OUTPUT_FILE_NAME);                 
-    FileHandling::print_column_names(outputFile);
+    const SymbolTable symbolTable = FileHandling::readSymbolTableFile(argv[SYMBOL_FILE_ARG_NUMBER]);   
+    const std::string programName = FileHandling::getProgramName(argv[INPUT_FILE_ARG_NUMBER]);
+    const std::string startAddress = symbolTable.SYMTAB[0].address;
+    
+    FileHandling::print_column_names(outputFile, programName, startAddress);
     const auto parser = std::unique_ptr<Parser>(new Parser());
-    const std::function<void(int)> recurseTextSection ([&](int textBytes) {  // While there are still bytes, extract them
-        if (STILL_MORE_BYTES(textBytes)) recurseTextSection(textBytes-extractInfoToOutput(inputFile, outputFile, parser));
+
+    const std::function<void(int, int)> recurseTextSection ([&](const int textBytes, const int LOCCTR) {  // While there are still bytes, extract them
+        if (STILL_MORE_BYTES(textBytes)) {
+           const int bytesUsed = extractInfoToOutput(inputFile, outputFile, parser);
+           std::cout << LOCCTR << std::endl;
+           recurseTextSection(textBytes-bytesUsed, LOCCTR + bytesUsed);
+        }
     });
-    while (!inputFile.eof()) recurseTextSection(FileHandling::locateTextSection(inputFile));  // Here we will actually call our lambda, which will execute bulk of program
+
+    while (!inputFile.eof()) {
+        const TextSectionDescriptor descriptor = FileHandling::locateTextSection(inputFile); 
+        recurseTextSection(descriptor.numberBytesReadIn, descriptor.LOCCTR_START);  
+    } // Here we will actually call our lambda, which will execute bulk of program
     return FileHandling::close(inputFile, outputFile); 
 }
+
+
+
+/*  // for (auto s : symbolTable.SYMTAB) std::cout << s.symbol << std::endl;
+    // for (auto s : symbolTable.LITTAB) std::cout << s.name << std::endl; */

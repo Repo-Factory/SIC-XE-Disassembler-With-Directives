@@ -3,6 +3,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <cstdint>
 
 struct SYMTAB_Entry
 {
@@ -14,7 +16,7 @@ struct SYMTAB_Entry
 struct LITTAB_Entry
 {
     const std::string name;
-    const std::string lit_Const;
+    const std::string lit_const;
     const std::string length;
     const std::string address;
 };
@@ -29,4 +31,5 @@ struct SymbolTable
     const std::vector<LITTAB_Entry> LITTAB;
 };
 
+std::map<const std::string&, const uint32_t> createTable(const SymbolTable symbolTable);
 #endif

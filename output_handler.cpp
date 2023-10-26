@@ -9,63 +9,43 @@
 #include <iostream>
 #include <vector>
 
-#define FORMAT_ENUM_DISPLACEMENT 2
-#define ADDRESSING_MODE_ENUM_DISPLACEMENT 1
+#define COLUMN_SPACING 12
 
-std::ostream& FileHandling::print_column_names(std::ofstream& stream, const std::string programName)
+std::string XSpaces(const int X)
 {
-    return stream << ("INSTR   FORMAT   OAT   TAAM   OBJ\n"); 
-}
-
-/* Static casting our enums will give us a value we can corresponding to array index to print appropriate string  */
-std::ostream& operator<<(std::ostream& stream, const AddressingMode addressingMode)
-{
-    switch (addressingMode)
+    std::string space;
+    int counter = X;
+    while (counter-- > 0)
     {
-        case AddressingMode::Simple:    return stream << "Simple";    break;
-        case AddressingMode::Immediate: return stream << "Immediate"; break;
-        case AddressingMode::Indirect:  return stream << "Indirect";  break;
+        space += " ";
     }
-    return stream << "Simple";
+    return space;
 }
 
-std::ostream& operator<<(std::ostream& stream, const TargetAddressMode targetAddressMode)
+std::string appendWord(const std::string& word)
 {
-    switch (targetAddressMode)
-    {
-        case TargetAddressMode::Absolute: return stream << "Absolute"; break;
-        case TargetAddressMode::Base:     return stream << "Base";     break;
-        case TargetAddressMode::PC:       return stream << "PC";       break;
-    }
-    return stream;
+    return word + XSpaces(COLUMN_SPACING - word.size());
 }
 
-std::ostream& operator<<(std::ostream& stream, const AddressingFormat instructionFormat)
+// First row to print
+std::ostream& FileHandling::print_column_names(std::ofstream& stream, const std::string& programName, const std::string& startAddress)
 {
-    switch (instructionFormat)
-    {
-        case AddressingFormat::Format2: return stream << "2"; break;
-        case AddressingFormat::Format3: return stream << "3"; break;
-        case AddressingFormat::Format4: return stream << "4"; break;
-    }
-    return stream;
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/* If indexed is true, print out _Indexed (this will be appended to the end of target address mode) */
-std::ostream& operator<<(std::ostream& stream, const Indexed wrapper)
-{
-    return wrapper.indexed ? stream << "_Indexed" : stream;
+    return stream   
+    << appendWord(startAddress) 
+    << appendWord(programName)  
+    << appendWord("START") 
+    << appendWord("0") 
+    << std::endl; 
 }
 
 /* Function called from main to print the answer for the output */
 std::ostream& operator<<(std::ostream& stream, const Output output)
 {
-    if (output.format == AddressingFormat::Format2) {
-        return stream << output.opCode << "      " << output.format << "              " << output.objectCode << std::endl;
-    } 
-    else {
-        return stream << output.opCode << "      " << output.format << "      " << output.addresingMode << "      " << 
-        output.targetAddressMode << Indexed{output.isIndexed} << "      " << output.objectCode << std::endl;
-    }
+    return stream  
+    << appendWord(output.LOCCTR)  
+    << appendWord(output.symbol)  
+    << appendWord(output.opcode)  
+    << appendWord(output.value) 
+    << appendWord(output.objectCode)  
+    << std::endl; 
 }

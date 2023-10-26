@@ -7,7 +7,7 @@
 
 namespace FileHandling
 {
-    std::ostream& print_column_names(std::ofstream& stream);
+    std::ostream& print_column_names(std::ofstream& stream, const std::string& programName, const std::string& startAddress);
 }
 
 /* Consolidates our output into a single struct to overload our << operator */

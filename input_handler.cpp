@@ -15,6 +15,8 @@
 #include <iostream>
 #include <cstring>
 #include <regex>
+#include <cctype> 
+
 
 #define FILE_OPEN_FAILURE_MESSAGE "Failed to open file: " 
 #define TEXT_SECTION_IDENTIFIER 'T'
@@ -71,14 +73,26 @@ std::string FileHandling::readInBytes(std::ifstream& stream, int numBytes, bool 
     return byteStream;
 }
 
+int hexStringToInt(const std::string& str)
+{
+    uint32_t hexInt;
+    std::istringstream converter(str);
+    converter >> std::hex >> hexInt;
+    return hexInt;
+}
+
 /* Looks for T section and grabs in description Bytes. Then we output the size in bytes of our text section to be used later to know how long to iterate */
-int FileHandling::locateTextSection(std::ifstream& stream)
+TextSectionDescriptor FileHandling::locateTextSection(std::ifstream& stream)
 {
     while (stream.peek() != TEXT_SECTION_IDENTIFIER && !stream.eof())    // Read in lines until we see T
         readInLine(stream);
-    readInChar(stream);                                 // Grab 'T'
-    readInBytes(stream, NUM_ADDRESS_DESCRIPTION_BYTES); // Read in 3 descriptor bytes
-    return convertStringToHex(readInByte(stream));      // Read in next byte and return the size it indicates
+    readInChar(stream);                                                  // Grab 'T'
+    const std::string LOCCTR_START = readInBytes(stream, NUM_ADDRESS_DESCRIPTION_BYTES); // Read in 3 descriptor bytes
+    std::cout << LOCCTR_START << std::endl;
+
+    const uint32_t LOCCTR = hexStringToInt(LOCCTR_START);
+    const uint32_t TEXT_SIZE = convertStringToHex(readInByte(stream));
+    return TextSectionDescriptor{LOCCTR, TEXT_SIZE};      // Read in next byte and return the size it indicates
     // This will place you at beginning of instructions
 }
 
@@ -195,6 +209,18 @@ namespace
         }
         return littab;
     }
+}
+
+const std::string FileHandling::getProgramName(const char* assemblyFile)
+{
+    std::string programName;
+    std::ifstream assembly = openFile(assemblyFile);
+    readInChar(assembly); // Skip 'H' header indicator
+    while (std::isdigit(assembly.peek()) == false) //!= numeric
+    {
+        programName += readInChar(assembly);
+    }
+    return programName;
 }
 
 const SymbolTable FileHandling::readSymbolTableFile(const char* filename)
