@@ -59,6 +59,14 @@ std::string convertHexToString(const int byte)
     convertFromHexToChar( byte & SECOND_4_BITS_MASK >> ZERO_BITS);    
 }
 
+int hexStringToInt(const std::string& str)
+{
+    int hexInt;
+    std::istringstream converter(str);
+    converter >> std::hex >> hexInt;
+    return hexInt;
+}
+
 /* opcode | nixbpe | address */
 
 int extractOpCode(const int byte) // Pass in first two hex digits 

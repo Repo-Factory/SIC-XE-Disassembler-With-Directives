@@ -19,13 +19,13 @@
 #include <fstream>
 #include <iostream>
 
+////////////////////////////////////////////////////////////
 const constexpr int INPUT_FILE_ARG_NUMBER = 1;
 const constexpr int SYMBOL_FILE_ARG_NUMBER = 2;
 const constexpr int ONE_BYTE = 1;
 const constexpr int PLUS_HALF_BYTE = 1;
 const constexpr int NUMBER_OF_HEX_CHARS_IN_ONE_BYTE = 2;
 const constexpr char* OUTPUT_FILE_NAME = "out.lst";
-
 const int BYTES_IN_HEX_STRING(const std::string& hex_str) 
 {
     return hex_str.size() / NUMBER_OF_HEX_CHARS_IN_ONE_BYTE;
@@ -34,6 +34,7 @@ const constexpr bool STILL_MORE_BYTES(int bytes)
 {
     return bytes > 0;
 }
+///////////////////////////////////////////////////////////
 
 struct DisassemblerState
 {
@@ -56,49 +57,36 @@ ParsingResult parseInstruction(std::ifstream& inputFile, const std::unique_ptr<P
     return ParsingResult                          {parsedInstruction, BYTES_IN_HEX_STRING(objectCode)} ;  // Return the total number of bytes traversed
 }
 
-const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR)
-{
-    return std::to_string(LOCCTR);
-}
-
-const std::string CREATE_SYMBOL_OUTPUT(const SymbolTable& table)
-{
-    return "";
-}
-
-const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const AddressingFormat format)
-{
-    return opcode;
-}
-
-const std::string CREATE_ADDRESS_OUTPUT(const AddressingMode addressingMode, const TargetAddressMode targetAddressMode)
-{
-    return "";
-}
-
-const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode)
-{
-    return objectCode;
-}
-
 using printToConsole = void;
 printToConsole generateOutput(const DisassemblerState state, std::ofstream& outputFile)
 {
     const std::string LOCCTR_OUTPUT     = CREATE_LOCCTR_OUTPUT(state.LOCCTR);
-    const std::string SYMBOL_OUTPUT     = CREATE_SYMBOL_OUTPUT(state.table);
+    const std::string SYMBOL_OUTPUT     = CREATE_SYMBOL_OUTPUT(state.LOCCTR, state.table);
     const std::string OPCODE_OUTPUT     = CREATE_OPCODE_OUTPUT(state.instruction.opCode, state.instruction.format);
     const std::string ADDRESS_OUTPUT    = CREATE_ADDRESS_OUTPUT(state.instruction.addresingMode, state.instruction.targetAddressMode);
     const std::string OBJECT_OUTPUT     = CREATE_OBJECT_OUTPUT(state.instruction.objectCode);
     outputFile                          << Output{LOCCTR_OUTPUT, SYMBOL_OUTPUT, OPCODE_OUTPUT, ADDRESS_OUTPUT, OBJECT_OUTPUT};
 }
 
-const SymbolTable printHeader(const char* argv[], std::ofstream& outputFile)
+const SymbolEntries printHeader(const char* argv[], std::ofstream& outputFile)
 {
-    const SymbolTable symbolTable = FileHandling::readSymbolTableFile(argv[SYMBOL_FILE_ARG_NUMBER]);   
+    const SymbolEntries symbolEntries = FileHandling::readSymbolTableFile(argv[SYMBOL_FILE_ARG_NUMBER]);   
     const std::string programName = FileHandling::getProgramName(argv[INPUT_FILE_ARG_NUMBER]);
-    const std::string startAddress = symbolTable.SYMTAB[0].address;
+    const std::string startAddress = symbolEntries.SYMTAB[0].address;
     FileHandling::print_column_names(outputFile, programName, startAddress);
-    return symbolTable;
+    return symbolEntries;
+}
+
+using bytesUsed = int;
+bytesUsed checkForSymbol(const int LOCCTR, const SymbolTable& symbolTable, std::ofstream& outputFile)
+{
+    auto it = symbolTable.find(LOCCTR);
+    if (it != symbolTable.end()) {
+        const LITTAB_Entry entry = it->second;
+        outputFile << Output{CREATE_LOCCTR_OUTPUT(LOCCTR), CREATE_SYMBOL_OUTPUT(LOCCTR, symbolTable), "BYTE", entry.lit_const, entry.lit_const.substr(2, std::stoi(entry.length))};
+        return std::stoi(entry.length)/2;
+    }
+    return false;
 }
 
 // Set up input/output files and traverse input instructions
@@ -106,11 +94,20 @@ int main(const int argc, const char* argv[])
 {
     std::ifstream inputFile = FileHandling::openFile(argv[INPUT_FILE_ARG_NUMBER]);
     std::ofstream outputFile(OUTPUT_FILE_NAME);                 
-    const SymbolTable symbolTable = printHeader(argv, outputFile);
+    const SymbolEntries symbolEntries = printHeader(argv, outputFile);
+    const SymbolTable symbolTable = createTable(symbolEntries);
     const auto parser = std::unique_ptr<Parser>(new Parser());
 
     const std::function<void(int, int)> recurseTextSection ([&](const int textBytes, const int LOCCTR) {  // While there are still bytes, extract them
         if (STILL_MORE_BYTES(textBytes)) {
+            //////////////SYMBOL////////////
+            const int symbolBytesUsed = checkForSymbol(LOCCTR, symbolTable, outputFile);
+            if (symbolBytesUsed > 0) {
+                FileHandling::readInBytes(inputFile, symbolBytesUsed, 0);
+                recurseTextSection(textBytes-symbolBytesUsed, LOCCTR+symbolBytesUsed);
+                return;
+            }
+            //////////////INSTRUCTION////////////
             const ParsingResult parseResult = parseInstruction(inputFile, parser);
             generateOutput(DisassemblerState{LOCCTR, parseResult.instruction, symbolTable}, outputFile);           
             recurseTextSection(textBytes-parseResult.bytesReadIn, LOCCTR+parseResult.bytesReadIn);

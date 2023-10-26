@@ -1,13 +1,14 @@
 000000      Assign      START       0           
-0           0           LDB         0           691002C6    
-4           0           STL         0           1722BF      
-7           0           LDA         0           022FFF      
-711         0           CLEAR       0           B400        
-713         0           SIO         0           F10500      
-716         0           LDA         0           000100      
-719         0           LDX         0           050000      
-722         0           LDA         0           01E32F      
-725         0           TIO         0           FA332FFA    
-729         0           LDCH        0           53AFEA      
-732         0           WD          0           DF2FEA      
-735         0           LDA         0           031002E3    
+0                       +LDB        #           691002C6    
+4                       STL                     1722BF      
+7                       LDA         @           022FFF      
+2c7                     CLEAR                   B400        
+2c9         VDEV        BYTE        X'F1'       F1          
+2ca                     LDX         #           050000      
+2cd                     LDA         #           010005      
+2d0         WDEV        BYTE        X'000001'   000001      
+2d3                     TD                      E32FFA      
+2d6                     JEQ                     332FFA      
+2d9                     LDCH                    53AFEA      
+2dc                     WD                      DF2FEA      
+2df                     +LDA                    031002E3    

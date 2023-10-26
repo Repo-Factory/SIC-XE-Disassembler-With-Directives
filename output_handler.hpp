@@ -2,8 +2,9 @@
 #define OUTPUT_HANDLER_H
 
 #include <fstream>
-#include "parser.hpp"
 #include <fstream>
+#include "parser.hpp"
+#include "symbol_table.hpp"
 
 namespace FileHandling
 {
@@ -42,6 +43,14 @@ struct Indexed
 {
     const bool indexed; 
 };
+
+const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR);
+const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SymbolTable& table);
+const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const AddressingFormat format);
+const std::string CREATE_ADDRESS_OUTPUT(const AddressingMode addressingMode, const TargetAddressMode targetAddressMode);
+const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode);
+const std::string prependString(const std::string& prependStr, const std::string& str);
+
 
 std::ostream& operator<<(std::ostream& stream, const AddressingMode addressingMode);
 

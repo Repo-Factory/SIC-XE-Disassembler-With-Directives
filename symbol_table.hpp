@@ -21,9 +21,9 @@ struct LITTAB_Entry
     const std::string address;
 };
 
-struct SymbolTable
+struct SymbolEntries
 {
-    SymbolTable(const std::vector<SYMTAB_Entry> SYMTAB, const std::vector<LITTAB_Entry> LITTAB) 
+    SymbolEntries(const std::vector<SYMTAB_Entry> SYMTAB, const std::vector<LITTAB_Entry> LITTAB) 
         : SYMTAB(SYMTAB), 
         LITTAB(LITTAB) 
     {}
@@ -31,5 +31,8 @@ struct SymbolTable
     const std::vector<LITTAB_Entry> LITTAB;
 };
 
-std::map<const std::string&, const uint32_t> createTable(const SymbolTable symbolTable);
+using SymbolTable = std::map<const int, LITTAB_Entry>;
+SymbolTable createTable(const SymbolEntries& symbolTable);
+const bool addressPresent(const int LOCCTR, const SymbolTable& table);
+
 #endif

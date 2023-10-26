@@ -6,6 +6,7 @@
 
 #include "symbol_table.hpp"
 #include "input_handler.hpp"
+#include "byte_operations.hpp"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -129,9 +130,28 @@ namespace
     }
 }
 
-const SymbolTable FileHandling::readSymbolTableFile(const char* filename)
+const SymbolEntries FileHandling::readSymbolTableFile(const char* filename)
 {
     std::ifstream startSym = advanceXLines(GET_SYMTAB_START(filename), filename);
     std::ifstream startLit = advanceXLines(GET_LITTAB_START(filename), filename);
-    return SymbolTable{CREATE_SYMTAB(GET_SYMTAB_SIZE(filename), startSym), CREATE_LITTAB(GET_LITTAB_SIZE(filename), startLit)};
+    return SymbolEntries{CREATE_SYMTAB(GET_SYMTAB_SIZE(filename), startSym), CREATE_LITTAB(GET_LITTAB_SIZE(filename), startLit)};
+}
+
+SymbolTable createTable(const SymbolEntries& symbolEntries)
+{
+    SymbolTable symbolTableMap;
+    for (const auto& entry : symbolEntries.LITTAB)
+    {
+        symbolTableMap.insert({hexStringToInt(entry.address), entry});
+    }
+    return symbolTableMap;
+}
+
+const bool addressPresent(const int LOCCTR, const SymbolTable& table)
+{
+    auto it = table.find(LOCCTR);
+    if (it != table.end()) {
+        return true;
+    }
+    return false;
 }

@@ -1,0 +1,2 @@
+/*  // for (auto s : symbolTable.SYMTAB) std::cout << s.symbol << std::endl;
+    // for (auto s : symbolTable.LITTAB) std::cout << s.name << std::endl; */

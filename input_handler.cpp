@@ -71,14 +71,6 @@ std::string FileHandling::readInBytes(std::ifstream& stream, int numBytes, bool 
     return byteStream;
 }
 
-int hexStringToInt(const std::string& str)
-{
-    int hexInt;
-    std::istringstream converter(str);
-    converter >> std::hex >> hexInt;
-    return hexInt;
-}
-
 /* Looks for T section and grabs in description Bytes. Then we output the size in bytes of our text section to be used later to know how long to iterate */
 TextSectionDescriptor FileHandling::locateTextSection(std::ifstream& stream)
 {
