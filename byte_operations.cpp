@@ -13,6 +13,7 @@
 #include <sstream>
 #include <iostream>
 #include <cstring>
+#include <algorithm>
 
 #define INIT_BIT_STREAM 0
 #define STRING_END_CHAR '\0'
@@ -65,6 +66,15 @@ int hexStringToInt(const std::string& str)
     std::istringstream converter(str);
     converter >> std::hex >> hexInt;
     return hexInt;
+}
+
+const std::string intToHexString(const int num)
+{
+    std::stringstream ss;
+    ss << std::hex << num; // Convert integer to hexadecimal string
+    std::string lower_string = ss.str();
+    std::transform(lower_string.begin(), lower_string.end(), lower_string.begin(), ::toupper);
+    return lower_string;
 }
 
 /* opcode | nixbpe | address */

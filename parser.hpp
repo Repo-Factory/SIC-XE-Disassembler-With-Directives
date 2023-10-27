@@ -30,12 +30,12 @@ class Parser
 {
     public:
         Parser();
-        std::string determineOpCode(const std::string& instruction);
-        AddressingFormat determineFormat(const std::string& instruction);
-        AddressingMode determineAddressingMode(const std::string& instruction);
-        TargetAddressMode determineTargetAddressMode(const std::string& instruction);
-        bool isIndexed(const std::string& firstThreeHexDigits);
-        std::string readInFullInstruction(std::ifstream& stream, const std::string& firstTwelveBits, const AddressingFormat format);
+        std::string determineOpCode(const std::string& instruction) const;
+        AddressingFormat determineFormat(const std::string& instruction) const;
+        AddressingMode determineAddressingMode(const std::string& instruction) const;
+        TargetAddressMode determineTargetAddressMode(const std::string& instruction) const;
+        bool isIndexed(const std::string& firstThreeHexDigits) const;
+        std::string readInFullInstruction(std::ifstream& stream, const std::string& firstTwelveBits, const AddressingFormat format) const;
     private:
         std::unique_ptr<InstructionBindings> instructionBindings;
 };

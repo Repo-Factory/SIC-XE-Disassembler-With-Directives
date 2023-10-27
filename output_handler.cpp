@@ -6,11 +6,17 @@
  */
 
 #include "output_handler.hpp"
+#include "byte_operations.hpp"
 #include <iostream>
 #include <vector>
 #include <sstream>
 
-#define COLUMN_SPACING 12
+#define COLUMN_SPACING 10
+#define IMMEDIATE_INDICATOR "#"
+#define INDIRECT_INDICATOR "@"
+#define FORMAT_4_INDICATOR "+"
+#define EMPTY_STRING ""
+#define SPACE " "
 
 const std::string XSpaces(const int X)
 {
@@ -18,7 +24,7 @@ const std::string XSpaces(const int X)
     int counter = X;
     while (counter-- > 0)
     {
-        space += " ";
+        space += SPACE;
     }
     return space;
 }
@@ -58,9 +64,7 @@ std::ostream& operator<<(std::ostream& stream, const Output output)
 
 const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR)
 {
-    std::stringstream hexConverter;
-    hexConverter << std::hex << LOCCTR;
-    return hexConverter.str();
+    return intToHexString(LOCCTR);
 }
 
 const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SymbolTable& table)
@@ -69,28 +73,43 @@ const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SymbolTable& tabl
     if (it != table.end()) {
         return it->second.name;
     }
-    return "";
+    return EMPTY_STRING;
 }
 
 const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const AddressingFormat format)
 {
     if (format == AddressingFormat::Format4) 
-        return prependString("+", opcode);
+        return prependString(FORMAT_4_INDICATOR, opcode);
     return opcode;
 }
 
-const std::string CREATE_ADDRESS_OUTPUT(const AddressingMode addressingMode, const TargetAddressMode targetAddressMode)
+namespace
 {
-    if (addressingMode == AddressingMode::Immediate)
-        return prependString("#", "");
-    if (addressingMode == AddressingMode::Indirect)
-        return prependString("@", "");
-    
-    // if (targetAddressMode == TargetAddressMode::Base)
-    // if (targetAddressMode == TargetAddressMode::PC)
-    // if (targetAddressMode == TargetAddressMode::Absolute)
-    
-    return "";
+    const std::string getAddress(const TargetAddressMode targetAddressMode, const std::string& objectCode, const OffsetInfo& offsetInfo)
+    {
+        const std::string address = objectCode.substr(3, objectCode.size()-1);
+        if (targetAddressMode == TargetAddressMode::Base)
+            return intToHexString(offsetInfo.BASE + hexStringToInt(address));
+        else if (targetAddressMode == TargetAddressMode::PC)
+            return intToHexString(offsetInfo.PC + hexStringToInt(address));
+        else if (targetAddressMode == TargetAddressMode::Absolute)
+            return address;
+        return EMPTY_STRING;
+    }
+
+    const std::string prependAddressMode(const AddressingMode addressingMode, const std::string& address)
+    {
+        if (addressingMode == AddressingMode::Immediate)
+            return prependString(IMMEDIATE_INDICATOR, address);
+        if (addressingMode == AddressingMode::Indirect)
+            return prependString(INDIRECT_INDICATOR, address);
+        return address;
+    }
+}
+
+const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const std::string& objectCode)
+{
+    return prependAddressMode(addressingInfo.addressingMode, getAddress(addressingInfo.targetAddressMode, objectCode, offsetInfo));
 }
 
 const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode)

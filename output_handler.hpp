@@ -11,6 +11,18 @@ namespace FileHandling
     std::ostream& print_column_names(std::ofstream& stream, const std::string& programName, const std::string& startAddress);
 }
 
+struct AddressingInfo
+{
+    const AddressingMode addressingMode;
+    const TargetAddressMode targetAddressMode;
+};
+
+struct OffsetInfo
+{
+    const int BASE;
+    const int PC;
+};
+
 /* Consolidates our output into a single struct to overload our << operator */
 
 struct ParsedInstruction
@@ -47,7 +59,7 @@ struct Indexed
 const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR);
 const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SymbolTable& table);
 const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const AddressingFormat format);
-const std::string CREATE_ADDRESS_OUTPUT(const AddressingMode addressingMode, const TargetAddressMode targetAddressMode);
+const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const std::string& objectCode);
 const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode);
 const std::string prependString(const std::string& prependStr, const std::string& str);
 
