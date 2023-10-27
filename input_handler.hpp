@@ -9,7 +9,7 @@
 struct TextSectionDescriptor
 {
     int LOCCTR_START;
-    int numberBytesReadIn;
+    int textSectionSize;
 };
 
 namespace FileHandling

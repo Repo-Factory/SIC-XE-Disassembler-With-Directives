@@ -36,13 +36,13 @@ Parser::Parser()
 }
 
 /* Get OpCode mnemonic from instructionBindings hash map by passing in extracted opcode */
-std::string Parser::determineOpCode(const std::string& firstThreeHexDigits)
+std::string Parser::determineOpCode(const std::string& firstThreeHexDigits) const
 {
     return this->instructionBindings->getMnemonic(convertHexToString(extractOpCode(convertStringToHex(getFirstTwoHexDigits(firstThreeHexDigits)))));
 }
 
 /* Can use clues from first three hex digits to determine format. */
-AddressingFormat Parser::determineFormat(const std::string& firstThreeHexDigits)
+AddressingFormat Parser::determineFormat(const std::string& firstThreeHexDigits) const
 {
     if (this->instructionBindings->isFormat2(convertHexToString(extractOpCode(convertStringToHex(getFirstTwoHexDigits(firstThreeHexDigits)))))) {
         return AddressingFormat::Format2; // We can use our knowledge of which OpCodes are format 2 to determine if format2
@@ -55,25 +55,26 @@ AddressingFormat Parser::determineFormat(const std::string& firstThreeHexDigits)
 }
 
 /* Extracting NI flags will give us a value between 1 and 3 which corresponds to addressing mode enum*/
-AddressingMode Parser::determineAddressingMode(const std::string& firstThreeHexDigits)
+AddressingMode Parser::determineAddressingMode(const std::string& firstThreeHexDigits) const
 {
     return static_cast<AddressingMode>(extract_ni_flags(convertStringToHex(getFirstTwoHexDigits(firstThreeHexDigits))));
 }
 
 /* Extract BP Flags will give us a value between 0 and 2 which corresponds to TargetAddressMode enum*/
-TargetAddressMode Parser::determineTargetAddressMode(const std::string& firstThreeHexDigits)
+TargetAddressMode Parser::determineTargetAddressMode(const std::string& firstThreeHexDigits) const
 {
     return static_cast<TargetAddressMode>(extract_bp_flags(convertStringToHex(getSecondTwoHexDigits(firstThreeHexDigits))));
 }
 
+/* extracting x flag will tell us if the addressing mode is indexed */
+bool Parser::isIndexed(const std::string& firstThreeHexDigits) const
+{
+    return extract_x_flag(convertStringToHex(getSecondTwoHexDigits(firstThreeHexDigits)));
+}
+
 /* Uses the format determination to figure out how many more bytes need to be read in after the first twelve bits */
-std::string Parser::readInFullInstruction(std::ifstream& stream, const std::string& firstTwelveBits, const AddressingFormat format)
+std::string Parser::readInFullInstruction(std::ifstream& stream, const std::string& firstTwelveBits, const AddressingFormat format) const
 {
     return firstTwelveBits + FileHandling::readInBytes(stream, static_cast<int>(format)-TWO_BYTES, PLUS_HALF_BYTE); // static cast format gives value between 2 and 4
 }
 
-/* extracting x flag will tell us if the addressing mode is indexed */
-bool Parser::isIndexed(const std::string& firstThreeHexDigits)
-{
-    return extract_x_flag(convertStringToHex(getSecondTwoHexDigits(firstThreeHexDigits)));
-}

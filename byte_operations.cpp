@@ -65,7 +65,7 @@ int hexStringToInt(const std::string& str)
     int hexInt;
     std::istringstream converter(str);
     converter >> std::hex >> hexInt;
-    return hexInt;
+    return hexInt << (32-str.size()*4) >> (32-str.size()*4);
 }
 
 const std::string intToHexString(const int num)
