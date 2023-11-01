@@ -6,7 +6,6 @@
  *  We will also need to perform conversions between characters and hex and vice versa
  */
 
-
 #include "byte_operations.hpp"
 #include <stdint.h>
 #include <bitset>
@@ -14,6 +13,7 @@
 #include <iostream>
 #include <cstring>
 #include <algorithm>
+#include <iomanip>
 
 #define INIT_BIT_STREAM 0
 #define STRING_END_CHAR '\0'
@@ -29,6 +29,8 @@
 #define NI_MASK 0x03
 #define BP_MASK 0x06
 #define E_FLAG_MASK 0x01
+#define INSTRUCTION_SIZE 32
+#define BITS_IN_HEX_CHAR 4
 #define HEX_CHARS "0123456789ABCDEF"
 
 int convertFromCharToHex(char c)
@@ -39,6 +41,12 @@ int convertFromCharToHex(char c)
 char convertFromHexToChar(int hex)
 {
     return HEX_CHARS[hex];
+}
+
+// Use shifting to fix signedness of our hex values
+int fixSignHexString(const int unsignedInt, const std::string& hexStr)
+{
+    return unsignedInt << (INSTRUCTION_SIZE-(hexStr.size()*BITS_IN_HEX_CHAR)) >> (INSTRUCTION_SIZE-(hexStr.size()*BITS_IN_HEX_CHAR));
 }
 
 /* This will take some characters read in and prepare them for masking. */
@@ -60,14 +68,16 @@ std::string convertHexToString(const int byte)
     convertFromHexToChar( byte & SECOND_4_BITS_MASK >> ZERO_BITS);    
 }
 
-int hexStringToInt(const std::string& str)
+// Similar to above function but we use istringstream for strings longer than two characters
+int hexStringToInt(const std::string& hexStr)
 {
     int hexInt;
-    std::istringstream converter(str);
+    std::istringstream converter(hexStr);
     converter >> std::hex >> hexInt;
-    return hexInt << (32-str.size()*4) >> (32-str.size()*4);
+    return fixSignHexString(hexInt, hexStr);
 }
 
+// Similar to above function but we use istringstream for strings longer than two characters
 const std::string intToHexString(const int num)
 {
     std::stringstream ss;

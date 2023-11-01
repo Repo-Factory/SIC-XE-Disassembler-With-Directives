@@ -82,6 +82,7 @@ TextSectionDescriptor FileHandling::locateTextSection(std::ifstream& stream)
     return TextSectionDescriptor{LOCCTR, TEXT_SIZE};                                        // Read in next byte and return the size it indicates
 }   // This will place you at beginning of instructions
 
+// Read in header record for program name
 const std::string FileHandling::getProgramName(const char* assemblyFile)
 {
     std::string programName;

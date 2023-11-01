@@ -5,10 +5,15 @@
 #include <fstream>
 #include "parser.hpp"
 #include "symbol_table.hpp"
+#include "disassembly.hpp"
+
+struct DisassemblerContext;
 
 namespace FileHandling
 {
     std::ostream& print_column_names(std::ofstream& stream, const std::string& programName, const std::string& startAddress);
+    void handleBaseDirective(const std::string& opcode, const std::string& objectCode, DisassemblerContext& context);
+    std::ostream& printEnd(std::ofstream& stream, const std::string& programName);
 }
 
 struct AddressingInfo
@@ -62,6 +67,8 @@ const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const Addressi
 const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const std::string& objectCode);
 const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode);
 const std::string prependString(const std::string& prependStr, const std::string& str);
+const SymbolEntries printHeader(const char* argv[], std::ofstream& outputFile);
+void outputSymbol(const DisassemblerContext& context, const int LOCCTR, const LITTAB_Entry& entry, std::ofstream& outputFile);
 
 
 std::ostream& operator<<(std::ostream& stream, const AddressingMode addressingMode);

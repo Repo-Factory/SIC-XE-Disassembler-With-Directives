@@ -5,24 +5,24 @@
 #include "output_handler.hpp"
 #include "parser.hpp"
 
+struct ParsedInstruction;
+
 struct DisassemblerContext 
 {
     std::ifstream& inputFile;
     std::ofstream& outputFile;
     const SymbolTable& symbolTable;
     const Parser& parser;
-    int BASE_DIRECTIVE;
+    int baseAdress;
 };
 
 struct DisassemblerState
 {
+    const int BASE;
     const int LOCCTR; 
     const ParsedInstruction& instruction;
     const SymbolTable& table;
 };
 
-const SymbolEntries printHeader(const char* argv[], std::ofstream& outputFile);
-int checkForSymbol(const int LOCCTR, const SymbolTable& symbolTable);
-void outputSymbol(const DisassemblerContext& context, const int LOCCTR, const LITTAB_Entry& entry, std::ofstream& outputFile);
 
 #endif

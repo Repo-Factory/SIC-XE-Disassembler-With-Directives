@@ -3,6 +3,8 @@
 
 #include <string>
 #include "instructions.hpp"
+#include "symbol_table.hpp"
+
 #include <memory>
 
 enum class AddressingFormat
@@ -25,6 +27,8 @@ enum class TargetAddressMode
     PC =            0x01, // 01
     Base =          0x02, // 10
 };
+
+bool checkForSymbol(const int LOCCTR, const SymbolTable& symbolTable);
 
 class Parser
 {

@@ -53,14 +53,6 @@ struct InstructionConstants
     };   
 };
 
-struct Directives
-{
-    const std::string directives[NUM_INSTRUCTIONS] = 
-    {
-        "START", "BASE", "BYTE", "END"
-    };
-};
-
 struct InstructionDescription 
 {
     std::string mnemonics;

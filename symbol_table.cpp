@@ -1,7 +1,8 @@
 /* 
- * @brief symbol_table does something cool
+ * @brief Handle populating our symbol table from sym.obj 
  *
- *
+ * There are Symbol Entries and Symbol Table structs defined in header which will hold each entry (line).
+ * We will use these to make a hash map where we map addresses to appropriate info
  */
 
 #include "symbol_table.hpp"
@@ -22,6 +23,9 @@ namespace
         return line.find_first_not_of(WHITE_SPACE_IDENTIFIER) == std::string::npos;
     }
 
+    /* 
+     * Convert line to vector of strings so we can reference each word separately
+     */
     const std::vector<std::string> GET_TOKENS(const std::string line)
     {
         std::string tokenHolder;
@@ -33,6 +37,9 @@ namespace
         return tokens;
     }
 
+    /* 
+     * Place file pointer at line X
+     */
     std::ifstream advanceXLines(const uint32_t X, const char* filename)
     {
         uint32_t counter = X;
@@ -45,6 +52,9 @@ namespace
         return stream;
     }
 
+    /* 
+     * Return line number where respective table starts
+     */
     const int GET_SYMTAB_START(const char* filename)
     {
         return HEADER_SIZE;
@@ -57,13 +67,18 @@ namespace
         std::ifstream stream = FileHandling::openFile(filename);
         while (std::getline(stream, line))
         {
-            if (isNewLine(line)) // Skip empty lines
+            if (isNewLine(line)) { // Skip empty lines
+                stream.close();
                 return counter+3;  
+            }
             counter++;
         }
-        stream.close();
+        exit(EXIT_FAILURE);
     }
 
+    /* 
+     * We will count the size of each table
+     */
     const int GET_SYMTAB_SIZE(const char* filename)
     {
         int32_t counter = 0;
@@ -78,6 +93,7 @@ namespace
             counter++;
         }
         stream.close();
+        exit(EXIT_FAILURE);
     }
 
     const int GET_LITTAB_SIZE(const char* filename)
@@ -93,6 +109,9 @@ namespace
         return counter;
     }
     
+    /* 
+     * Tokenize each line to store each word into appropriate field of struct
+     */
     const SYMTAB_Entry CREATE_SYMTAB_ENTRY(const std::string line)
     {
         const std::vector<std::string> tokens = GET_TOKENS(line);
@@ -105,6 +124,10 @@ namespace
         return LITTAB_Entry{tokens[0], tokens[1], tokens[2], tokens[3]};
     }
 
+    /* 
+     * These functions will start at the first line of the appropriate table, then iterate through the table using its size
+     * and store every entry as a struct into a vector
+     */
     const std::vector<SYMTAB_Entry> CREATE_SYMTAB(const int symtab_size, std::ifstream& stream)
     {
         std::vector<SYMTAB_Entry> symtab;
@@ -130,6 +153,7 @@ namespace
     }
 }
 
+/* Store our SymbolEntries into data structure */
 const SymbolEntries FileHandling::readSymbolTableFile(const char* filename)
 {
     std::ifstream startSym = advanceXLines(GET_SYMTAB_START(filename), filename);
@@ -137,6 +161,7 @@ const SymbolEntries FileHandling::readSymbolTableFile(const char* filename)
     return SymbolEntries{CREATE_SYMTAB(GET_SYMTAB_SIZE(filename), startSym), CREATE_LITTAB(GET_LITTAB_SIZE(filename), startLit)};
 }
 
+/* Rearrange our data structure into a map to find symbols and their info easily from current LOCCTR */
 SymbolTable createTable(const SymbolEntries& symbolEntries)
 {
     SymbolTable symbolTableMap;

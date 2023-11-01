@@ -17,10 +17,12 @@
 #include "output_handler.hpp"
 #include "disassembly.hpp"
 #include "parser.hpp"
+#include "byte_operations.hpp"
 #include <fstream>
 #include <iostream>
 
 ////////////////////////////////////////////////////////////
+using printToConsole = void;
 const constexpr int INPUT_FILE_ARG_NUMBER = 1;
 const constexpr int SYMBOL_FILE_ARG_NUMBER = 2;
 const constexpr int ONE_BYTE = 1;
@@ -49,11 +51,12 @@ ParsingResult parseInstruction(std::ifstream& inputFile, const Parser& parser)
     return ParsingResult                          {parsedInstruction, BYTES_IN_HEX_STRING(objectCode)} ;  // Return the total number of bytes traversed
 }
 
-using printToConsole = void;
+// This function will use the current state variables like LOCCTR, pc counter, and the last read instruction
+// to be able to output to our text file the correct information
 printToConsole generateOutput(const DisassemblerState& state, const int bytesReadIn, std::ofstream& outputFile)
 {
     const AddressingInfo ADDRESSMODES   {state.instruction.addresingMode, state.instruction.targetAddressMode};
-    const OffsetInfo  OFFSETS           {0, state.LOCCTR + bytesReadIn};
+    const OffsetInfo  OFFSETS           {state.BASE, state.LOCCTR + bytesReadIn};
     const std::string LOCCTR_OUTPUT     = CREATE_LOCCTR_OUTPUT(state.LOCCTR);
     const std::string SYMBOL_OUTPUT     = CREATE_SYMBOL_OUTPUT(state.LOCCTR, state.table);
     const std::string OPCODE_OUTPUT     = CREATE_OPCODE_OUTPUT(state.instruction.opCode, state.instruction.format);
@@ -62,23 +65,30 @@ printToConsole generateOutput(const DisassemblerState& state, const int bytesRea
     outputFile                          << Output{LOCCTR_OUTPUT, SYMBOL_OUTPUT, OPCODE_OUTPUT, ADDRESS_OUTPUT, OBJECT_OUTPUT};
 }
 
+// The disassembler will behave differently if it's a symbol instead of an instruction
+// here it will have to look for an entry in the table and find and output the appropriate information
+// like the handle instruction function it will also have to keep track of the amount of bytes traversed
 const int handleSymbol(const DisassemblerContext& context, const int LOCCTR)
 {
     const LITTAB_Entry entry = context.symbolTable.find(LOCCTR)->second;
-    const int labelBytes = std::stoi(entry.length)/2;
+    const int labelBytes = std::stoi(entry.length)/NUMBER_OF_HEX_CHARS_IN_ONE_BYTE;
     FileHandling::readInBytes(context.inputFile, labelBytes, NO_HALF_BYTE);
     outputSymbol(context, LOCCTR, entry, context.outputFile);
     return labelBytes;
 }
 
+// If no symbol is found will go through with our default behaviour which is to parsing instruction and output the disassembled code
 const int handleInstruction(DisassemblerContext& context, const int LOCCTR)
 {
     const ParsingResult parseResult = parseInstruction(context.inputFile, context.parser);
-    const DisassemblerState state = DisassemblerState{LOCCTR, parseResult.instruction, context.symbolTable};
-    generateOutput(state, parseResult.bytesReadIn, context.outputFile);           
+    const DisassemblerState state = DisassemblerState{context.baseAdress, LOCCTR, parseResult.instruction, context.symbolTable};
+    generateOutput(state, parseResult.bytesReadIn, context.outputFile); 
+    FileHandling::handleBaseDirective(parseResult.instruction.opCode, parseResult.instruction.objectCode, context);
     return parseResult.bytesReadIn;
 }
-
+ 
+// This recursive function will allow us to avoid mutable state while looping through text file.
+// It will Naturally keep track of the LOCCTR because the handle symbol and handle instruction functions return bytes traversed
 void recurseTextSection(DisassemblerContext& context, const int textBytesRemaining, const int LOCCTR) 
 {  
     if (STILL_MORE_BYTES(textBytesRemaining)) {
@@ -107,5 +117,6 @@ int main(const int argc, const char* argv[])
         recurseTextSection(context, descriptor.textSectionSize, descriptor.LOCCTR_START);  
     }   
 
+    FileHandling::printEnd(outputFile, FileHandling::getProgramName(argv[INPUT_FILE_ARG_NUMBER]));
     return FileHandling::close(inputFile, outputFile); 
 }
