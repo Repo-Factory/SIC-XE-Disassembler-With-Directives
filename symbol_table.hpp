@@ -31,6 +31,8 @@ struct SymbolEntries
     const std::vector<LITTAB_Entry> LITTAB;
 };
 
+std::vector<LITTAB_Entry> GET_LITERALS(const SymbolEntries& symbolEntries);
+
 using SYMMAP = std::map<const int, SYMTAB_Entry>;
 using LITMAP = std::map<const int, LITTAB_Entry>;
 struct SymbolTable

@@ -14,19 +14,20 @@
 const constexpr int INPUT_FILE_ARG_NUMBER = 1;
 const constexpr int SYMBOL_FILE_ARG_NUMBER = 2;
 const constexpr int NUMBER_PRINTOUT_SIZE =  4;
-const constexpr int COLUMN_SPACING =  10;
+const constexpr int COLUMN_SPACING =  12;
 const constexpr char* IMMEDIATE_INDICATOR =  "#";
 const constexpr char* INDIRECT_INDICATOR =  "@";
 const constexpr char* FORMAT_4_INDICATOR =  "+";
-const constexpr char* LDB_INSTRUCTION =  "LDB";
-const constexpr char* NUMBER_PADDING =  "0";
+const constexpr char* NUMBER_PADDING = "0";
 const constexpr char* EMPTY_STRING =  "";
-const constexpr char* SPACE =  " ";
+const constexpr char* SPACE = " ";
 const constexpr char* START_DIRECTIVE =  "START";
-const constexpr char* END_DIRECTIVE =  "END";
-const constexpr char* BASE_DIRECTIVE =  "BASE";
 const constexpr char* FIRST_DIRECTIVE =  "FIRST";
+const constexpr char* BASE_DIRECTIVE =  "BASE";
 const constexpr char* BYTE_DIRECTIVE = "BYTE";
+const constexpr char* LITERAL_DIRECTIVE = "*";
+const constexpr char* LDB_INSTRUCTION =  "LDB";
+const constexpr char* END_DIRECTIVE =  "END";
 
 /********************************************************* 
  *                  FORMATTING HELPERS                   *
@@ -78,16 +79,32 @@ const SymbolEntries printHeader(const char* argv[], std::ofstream& outputFile)
 
 // This will be create the appropriate output for a symbol
 void outputSymbol(const DisassemblerContext& context, const int LOCCTR, const LITTAB_Entry& entry, std::ofstream& outputFile)
-{
-    outputFile << 
-    Output
+{   
+    const bool IS_LITERAL = entry.lit_const.front() == '='; 
+    if(IS_LITERAL)
     {
-        CREATE_LOCCTR_OUTPUT(LOCCTR), 
-        CREATE_SYMBOL_OUTPUT(LOCCTR, context.symmap, context.litmap), 
-        BYTE_DIRECTIVE, 
-        entry.lit_const, 
-        entry.lit_const.substr(2, std::stoi(entry.length))
-    };
+        outputFile << 
+        Output
+        {
+            CREATE_LOCCTR_OUTPUT(LOCCTR), 
+            EMPTY_STRING,
+            LITERAL_DIRECTIVE, 
+            entry.lit_const, 
+            entry.lit_const.substr(3, std::stoi(entry.length))
+        };
+    }
+    else
+    {
+        outputFile << 
+        Output
+        {
+            CREATE_LOCCTR_OUTPUT(LOCCTR), 
+            CREATE_SYMBOL_OUTPUT(LOCCTR, context.symmap, context.litmap), 
+            BYTE_DIRECTIVE, 
+            entry.lit_const, 
+            entry.lit_const.substr(2, std::stoi(entry.length))
+        };
+    }
 }
 
 // First row to print
@@ -150,6 +167,8 @@ namespace
     {
         auto lit_it = litmap.find(LOCCTR);
         if (lit_it != litmap.end()) {
+            if (lit_it->second.name == LITERAL_DIRECTIVE)
+                return lit_it->second.lit_const;
             return lit_it->second.name;
         }
         auto sym_it = symmap.find(LOCCTR);

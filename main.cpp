@@ -22,7 +22,7 @@
 #include <iostream>
 
 ////////////////////////////////////////////////////////////
-using printToConsole = void;
+using PrintToConsole = void;
 const constexpr int INPUT_FILE_ARG_NUMBER = 1;
 const constexpr int SYMBOL_FILE_ARG_NUMBER = 2;
 const constexpr int ONE_BYTE = 1;
@@ -53,7 +53,7 @@ ParsingResult parseInstruction(std::ifstream& inputFile, const Parser& parser)
 
 // This function will use the current state variables like LOCCTR, pc counter, and the last read instruction
 // to be able to output to our text file the correct information
-printToConsole generateOutput(const DisassemblerState& state, const int bytesReadIn, std::ofstream& outputFile)
+PrintToConsole generateOutput(const DisassemblerState& state, const int bytesReadIn, std::ofstream& outputFile)
 {
     const AddressingInfo ADDRESSMODES   {state.instruction.addresingMode, state.instruction.targetAddressMode};
     const OffsetInfo  OFFSETS           {state.BASE, state.LOCCTR + bytesReadIn};
@@ -109,6 +109,7 @@ int main(const int argc, const char* argv[])
     std::ifstream inputFile                 = FileHandling::openFile(argv[INPUT_FILE_ARG_NUMBER]);
     std::ofstream outputFile                (OUTPUT_FILE_NAME);       
     const auto symbolEntries                = printHeader(argv, outputFile);          
+    const auto literals                     = GET_LITERALS(symbolEntries);
     const LITMAP litmap                     = CREATE_LITMAP(symbolEntries);
     const SYMMAP symmap                     = CREATE_SYMMAP(symbolEntries);
     const Parser parser;

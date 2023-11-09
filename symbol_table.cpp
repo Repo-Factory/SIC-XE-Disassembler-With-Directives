@@ -13,8 +13,10 @@
 #include <sstream>
 #include <iostream>
 
+#define LITERAL_TOKENS_SIZE 3
 #define HEADER_SIZE 2
 #define WHITE_SPACE_IDENTIFIER " "
+#define LITERAL_STRING "*"
 
 namespace
 {
@@ -101,10 +103,12 @@ namespace
         uint32_t counter = 0;
         std::string line;
         std::ifstream stream = advanceXLines(GET_LITTAB_START(filename), filename);
-        while (std::getline(stream, line))
+        std::getline(stream, line);
+        while (!isNewLine(line))
         {
             counter++;
-        }
+            std::getline(stream, line);
+        }        
         stream.close();
         return counter;
     }
@@ -121,6 +125,7 @@ namespace
     const LITTAB_Entry CREATE_LITTAB_ENTRY(const std::string line)
     {
         const std::vector<std::string> tokens = GET_TOKENS(line);
+        if (tokens.size() == LITERAL_TOKENS_SIZE) {return LITTAB_Entry{LITERAL_STRING, tokens[0], tokens[1], tokens[2]};}
         return LITTAB_Entry{tokens[0], tokens[1], tokens[2], tokens[3]};
     }
 
@@ -181,6 +186,16 @@ SYMMAP CREATE_SYMMAP(const SymbolEntries& symbolEntries)
         map.insert({hexStringToInt(entry.address), entry});
     }
     return map;
+}
+
+std::vector<LITTAB_Entry> GET_LITERALS(const SymbolEntries& symbolEntries)
+{
+    std::vector<LITTAB_Entry> literals;
+    for (auto& entry : symbolEntries.LITTAB)
+    {
+        if (entry.name == LITERAL_STRING) literals.push_back(entry);
+    }
+    return literals;
 }
 
 /* Look for symbol in our symbol table */
