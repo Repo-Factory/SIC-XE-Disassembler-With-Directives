@@ -84,7 +84,7 @@ void outputSymbol(const DisassemblerContext& context, const int LOCCTR, const LI
     Output
     {
         CREATE_LOCCTR_OUTPUT(LOCCTR), 
-        CREATE_SYMBOL_OUTPUT(LOCCTR, context.symbolTable), 
+        CREATE_SYMBOL_OUTPUT(LOCCTR, context.litmap), 
         BYTE_DIRECTIVE, 
         entry.lit_const, 
         entry.lit_const.substr(2, std::stoi(entry.length))
@@ -118,12 +118,12 @@ void FileHandling::handleBaseDirective(const std::string& opcode, const std::str
 {
     if (opcode == LDB_INSTRUCTION)
     {
-        context.baseAdress = hexStringToInt(objectCode.substr(3, objectCode.size()));
+        context.baseAddress = hexStringToInt(objectCode.substr(3, objectCode.size()));
         context.outputFile 
         << appendWord(EMPTY_STRING)
         << appendWord(EMPTY_STRING)
         << appendWord(BASE_DIRECTIVE) 
-        << appendWord(pad(intToHexString(context.baseAdress)))  
+        << appendWord(pad(intToHexString(context.baseAddress)))  
         << std::endl;
     }          
 }
@@ -152,7 +152,7 @@ const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR)
 }
 
 // Search Our Symbol table
-const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SymbolTable& table)
+const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const LITMAP& table)
 {
     if (LOCCTR == 0) 
         return FIRST_DIRECTIVE;

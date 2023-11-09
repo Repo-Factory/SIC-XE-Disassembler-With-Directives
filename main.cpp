@@ -70,7 +70,7 @@ printToConsole generateOutput(const DisassemblerState& state, const int bytesRea
 // like the handle instruction function it will also have to keep track of the amount of bytes traversed
 const int handleSymbol(const DisassemblerContext& context, const int LOCCTR)
 {
-    const LITTAB_Entry entry = context.symbolTable.find(LOCCTR)->second;
+    const LITTAB_Entry entry = context.litmap.find(LOCCTR)->second;
     const int labelBytes = std::stoi(entry.length)/NUMBER_OF_HEX_CHARS_IN_ONE_BYTE;
     FileHandling::readInBytes(context.inputFile, labelBytes, NO_HALF_BYTE);
     outputSymbol(context, LOCCTR, entry, context.outputFile);
@@ -81,7 +81,7 @@ const int handleSymbol(const DisassemblerContext& context, const int LOCCTR)
 const int handleInstruction(DisassemblerContext& context, const int LOCCTR)
 {
     const ParsingResult parseResult = parseInstruction(context.inputFile, context.parser);
-    const DisassemblerState state = DisassemblerState{context.baseAdress, LOCCTR, parseResult.instruction, context.symbolTable};
+    const DisassemblerState state = DisassemblerState{context.baseAddress, LOCCTR, parseResult.instruction, context.litmap};
     generateOutput(state, parseResult.bytesReadIn, context.outputFile); 
     FileHandling::handleBaseDirective(parseResult.instruction.opCode, parseResult.instruction.objectCode, context);
     return parseResult.bytesReadIn;
@@ -93,7 +93,7 @@ void recurseTextSection(DisassemblerContext& context, const int textBytesRemaini
 {  
     if (STILL_MORE_BYTES(textBytesRemaining)) {
         int bytesTraversed;
-        if (checkForSymbol(LOCCTR, context.symbolTable)) {
+        if (checkForSymbol(LOCCTR, context.litmap)) {
             bytesTraversed = handleSymbol(context, LOCCTR);
         }
         else {
@@ -107,10 +107,12 @@ void recurseTextSection(DisassemblerContext& context, const int textBytesRemaini
 int main(const int argc, const char* argv[])
 {
     std::ifstream inputFile                 = FileHandling::openFile(argv[INPUT_FILE_ARG_NUMBER]);
-    std::ofstream outputFile                (OUTPUT_FILE_NAME);                 
-    const SymbolTable symbolTable           = createTable(printHeader(argv, outputFile));
+    std::ofstream outputFile                (OUTPUT_FILE_NAME);       
+    const auto symbolEntries                = printHeader(argv, outputFile);          
+    const LITMAP litmap                     = CREATE_LITMAP(symbolEntries);
+    const SYMMAP symmap                     = CREATE_SYMMAP(symbolEntries);
     const Parser parser;
-    DisassemblerContext                     context{inputFile, outputFile, symbolTable, parser, INITIAL_BASE};
+    DisassemblerContext                     context{inputFile, outputFile, symmap, litmap, parser, INITIAL_BASE};
 
     while (!inputFile.eof()) {
         const TextSectionDescriptor descriptor = FileHandling::locateTextSection(inputFile); 

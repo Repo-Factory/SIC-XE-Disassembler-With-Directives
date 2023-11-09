@@ -77,12 +77,3 @@ std::string Parser::readInFullInstruction(std::ifstream& stream, const std::stri
 {
     return firstTwelveBits + FileHandling::readInBytes(stream, static_cast<int>(format)-TWO_BYTES, PLUS_HALF_BYTE); // static cast format gives value between 2 and 4
 }
-
-bool checkForSymbol(const int LOCCTR, const SymbolTable& symbolTable)
-{
-    auto it = symbolTable.find(LOCCTR);
-    if (it != symbolTable.end()) {
-        return true;
-    }
-    return false;
-}

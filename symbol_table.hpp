@@ -31,8 +31,17 @@ struct SymbolEntries
     const std::vector<LITTAB_Entry> LITTAB;
 };
 
-using SymbolTable = std::map<const int, LITTAB_Entry>;
-SymbolTable createTable(const SymbolEntries& symbolTable);
-const bool addressPresent(const int LOCCTR, const SymbolTable& table);
+using SYMMAP = std::map<const int, SYMTAB_Entry>;
+using LITMAP = std::map<const int, LITTAB_Entry>;
+struct SymbolTable
+{
+    const SYMMAP symmap;
+    const LITMAP litmap;
+};
+
+LITMAP CREATE_LITMAP(const SymbolEntries& litmap);
+SYMMAP CREATE_SYMMAP(const SymbolEntries& litmap);
+bool checkForSymbol(const int LOCCTR, const LITMAP& litmap);
+bool checkForSymbol(const int LOCCTR, const SYMMAP& symmap);
 
 #endif

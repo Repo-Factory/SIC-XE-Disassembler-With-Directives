@@ -162,20 +162,41 @@ const SymbolEntries FileHandling::readSymbolTableFile(const char* filename)
 }
 
 /* Rearrange our data structure into a map to find symbols and their info easily from current LOCCTR */
-SymbolTable createTable(const SymbolEntries& symbolEntries)
+LITMAP CREATE_LITMAP(const SymbolEntries& symbolEntries)
 {
-    SymbolTable symbolTableMap;
+    LITMAP map;
     for (const auto& entry : symbolEntries.LITTAB)
     {
-        symbolTableMap.insert({hexStringToInt(entry.address), entry});
+        map.insert({hexStringToInt(entry.address), entry});
     }
-    return symbolTableMap;
+    return map;
 }
 
-const bool addressPresent(const int LOCCTR, const SymbolTable& table)
+/* Rearrange our data structure into a map to find symbols and their info easily from current address */
+SYMMAP CREATE_SYMMAP(const SymbolEntries& symbolEntries)
 {
-    auto it = table.find(LOCCTR);
-    if (it != table.end()) {
+    SYMMAP map;
+    for (const auto& entry : symbolEntries.SYMTAB)
+    {
+        map.insert({hexStringToInt(entry.address), entry});
+    }
+    return map;
+}
+
+/* Look for symbol in our symbol table */
+bool checkForSymbol(const int LOCCTR, const LITMAP& litmap)
+{
+    auto it = litmap.find(LOCCTR);
+    if (it != litmap.end()) {
+        return true;
+    }
+    return false;
+}
+
+bool checkForSymbol(const int LOCCTR, const SYMMAP& symmap)
+{
+    auto it = symmap.find(LOCCTR);
+    if (it != symmap.end()) {
         return true;
     }
     return false;

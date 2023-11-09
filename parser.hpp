@@ -28,8 +28,6 @@ enum class TargetAddressMode
     Base =          0x02, // 10
 };
 
-bool checkForSymbol(const int LOCCTR, const SymbolTable& symbolTable);
-
 class Parser
 {
     public:

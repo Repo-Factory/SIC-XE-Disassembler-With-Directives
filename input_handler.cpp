@@ -17,7 +17,6 @@
 #include <regex>
 #include <cctype> 
 
-
 #define FILE_OPEN_FAILURE_MESSAGE "Failed to open file: " 
 #define TEXT_SECTION_IDENTIFIER 'T'
 #define NUM_ADDRESS_DESCRIPTION_BYTES 3
