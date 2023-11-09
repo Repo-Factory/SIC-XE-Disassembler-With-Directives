@@ -84,7 +84,7 @@ void outputSymbol(const DisassemblerContext& context, const int LOCCTR, const LI
     Output
     {
         CREATE_LOCCTR_OUTPUT(LOCCTR), 
-        CREATE_SYMBOL_OUTPUT(LOCCTR, context.litmap), 
+        CREATE_SYMBOL_OUTPUT(LOCCTR, context.symmap, context.litmap), 
         BYTE_DIRECTIVE, 
         entry.lit_const, 
         entry.lit_const.substr(2, std::stoi(entry.length))
@@ -152,13 +152,15 @@ const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR)
 }
 
 // Search Our Symbol table
-const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const LITMAP& table)
+const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SYMMAP& symmap, const LITMAP& litmap)
 {
-    if (LOCCTR == 0) 
-        return FIRST_DIRECTIVE;
-    auto it = table.find(LOCCTR);
-    if (it != table.end()) {
-        return it->second.name;
+    auto lit_it = litmap.find(LOCCTR);
+    if (lit_it != litmap.end()) {
+        return lit_it->second.name;
+    }
+    auto sym_it = symmap.find(LOCCTR);
+    if (sym_it != symmap.end()) {
+        return sym_it->second.symbol;
     }
     return EMPTY_STRING;
 }

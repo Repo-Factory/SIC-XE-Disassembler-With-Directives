@@ -66,7 +66,7 @@ struct Indexed
 };
 
 const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR);
-const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const LITMAP& table);
+const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SYMMAP& symmap, const LITMAP& litmap);
 const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const AddressingFormat format);
 const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const std::string& objectCode);
 const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode);

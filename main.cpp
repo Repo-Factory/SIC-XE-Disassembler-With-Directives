@@ -58,7 +58,7 @@ printToConsole generateOutput(const DisassemblerState& state, const int bytesRea
     const AddressingInfo ADDRESSMODES   {state.instruction.addresingMode, state.instruction.targetAddressMode};
     const OffsetInfo  OFFSETS           {state.BASE, state.LOCCTR + bytesReadIn};
     const std::string LOCCTR_OUTPUT     = CREATE_LOCCTR_OUTPUT(state.LOCCTR);
-    const std::string SYMBOL_OUTPUT     = CREATE_SYMBOL_OUTPUT(state.LOCCTR, state.table);
+    const std::string SYMBOL_OUTPUT     = CREATE_SYMBOL_OUTPUT(state.LOCCTR, state.symmap, state.litmap);
     const std::string OPCODE_OUTPUT     = CREATE_OPCODE_OUTPUT(state.instruction.opCode, state.instruction.format);
     const std::string ADDRESS_OUTPUT    = CREATE_ADDRESS_OUTPUT(ADDRESSMODES, OFFSETS, state.instruction.objectCode);
     const std::string OBJECT_OUTPUT     = CREATE_OBJECT_OUTPUT(state.instruction.objectCode);
@@ -81,7 +81,7 @@ const int handleSymbol(const DisassemblerContext& context, const int LOCCTR)
 const int handleInstruction(DisassemblerContext& context, const int LOCCTR)
 {
     const ParsingResult parseResult = parseInstruction(context.inputFile, context.parser);
-    const DisassemblerState state = DisassemblerState{context.baseAddress, LOCCTR, parseResult.instruction, context.litmap};
+    const DisassemblerState state = DisassemblerState{context.baseAddress, LOCCTR, parseResult.instruction, context.symmap, context.litmap};
     generateOutput(state, parseResult.bytesReadIn, context.outputFile); 
     FileHandling::handleBaseDirective(parseResult.instruction.opCode, parseResult.instruction.objectCode, context);
     return parseResult.bytesReadIn;

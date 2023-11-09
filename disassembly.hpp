@@ -23,7 +23,8 @@ struct DisassemblerState
     const int BASE;
     const int LOCCTR; 
     const ParsedInstruction& instruction;
-    const LITMAP& table;
+    const SYMMAP& symmap;
+    const LITMAP& litmap;
 };
 
 enum class Registers
