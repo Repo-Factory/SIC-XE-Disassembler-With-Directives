@@ -11,11 +11,13 @@
 #include <vector>
 #include <sstream>
 
+const constexpr int INPUT_FILE_ARG_NUMBER = 1;
+const constexpr int SYMBOL_FILE_ARG_NUMBER = 2;
+const constexpr int NUMBER_PRINTOUT_SIZE =  4;
 const constexpr int COLUMN_SPACING =  10;
 const constexpr char* IMMEDIATE_INDICATOR =  "#";
 const constexpr char* INDIRECT_INDICATOR =  "@";
 const constexpr char* FORMAT_4_INDICATOR =  "+";
-const constexpr int NUMBER_PRINTOUT_SIZE =  4;
 const constexpr char* LDB_INSTRUCTION =  "LDB";
 const constexpr char* NUMBER_PADDING =  "0";
 const constexpr char* EMPTY_STRING =  "";
@@ -24,10 +26,7 @@ const constexpr char* START_DIRECTIVE =  "START";
 const constexpr char* END_DIRECTIVE =  "END";
 const constexpr char* BASE_DIRECTIVE =  "BASE";
 const constexpr char* FIRST_DIRECTIVE =  "FIRST";
-const constexpr int INPUT_FILE_ARG_NUMBER = 1;
-const constexpr int SYMBOL_FILE_ARG_NUMBER = 2;
 const constexpr char* BYTE_DIRECTIVE = "BYTE";
-const constexpr char* BASE_DIRECTIVE_CODE = "LDB";
 
 /********************************************************* 
  *                  FORMATTING HELPERS                   *
@@ -144,6 +143,22 @@ std::ostream& operator<<(std::ostream& stream, const Output output)
 /************************************************************ 
  * PERFORM OPERATIONS TO DETERMINE CORRECT STRING TO OUTPUT *
  ************************************************************/
+namespace
+{
+    // Search tables for address of interest
+    const std::string findLabel(const int LOCCTR, const SYMMAP& symmap, const LITMAP& litmap)
+    {
+        auto lit_it = litmap.find(LOCCTR);
+        if (lit_it != litmap.end()) {
+            return lit_it->second.name;
+        }
+        auto sym_it = symmap.find(LOCCTR);
+        if (sym_it != symmap.end()) {
+            return sym_it->second.symbol;
+        }
+        return EMPTY_STRING;
+    }
+}
 
 // Take current LOCCTR and convert to hex string
 const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR)
@@ -154,15 +169,7 @@ const std::string CREATE_LOCCTR_OUTPUT(const int LOCCTR)
 // Search Our Symbol table
 const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SYMMAP& symmap, const LITMAP& litmap)
 {
-    auto lit_it = litmap.find(LOCCTR);
-    if (lit_it != litmap.end()) {
-        return lit_it->second.name;
-    }
-    auto sym_it = symmap.find(LOCCTR);
-    if (sym_it != symmap.end()) {
-        return sym_it->second.symbol;
-    }
-    return EMPTY_STRING;
+    return findLabel(LOCCTR, symmap, litmap);
 }
 
 // Will determine if any assembler information needs to be appended/prepended to opcode
@@ -200,9 +207,13 @@ namespace //Helpers to construct address
 }
 
 // Use helpers to create full address string to output
-const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const std::string& objectCode)
+const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const DisassemblerState& state)
 {
-    return prependAddressMode(addressingInfo.addressingMode, getAddress(addressingInfo.targetAddressMode, objectCode, offsetInfo));
+    const std::string address = getAddress(addressingInfo.targetAddressMode, state.instruction.objectCode, offsetInfo);
+    const int32_t tableAddress = hexStringToInt(address);
+    const std::string tableLabel = findLabel(tableAddress, state.symmap, state.litmap);
+    const std::string label = tableLabel==EMPTY_STRING ? address : tableLabel;
+    return prependAddressMode(addressingInfo.addressingMode, label);
 }
 
 // No manipulations but keep our main function consistent

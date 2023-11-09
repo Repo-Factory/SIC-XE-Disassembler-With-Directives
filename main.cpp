@@ -60,7 +60,7 @@ printToConsole generateOutput(const DisassemblerState& state, const int bytesRea
     const std::string LOCCTR_OUTPUT     = CREATE_LOCCTR_OUTPUT(state.LOCCTR);
     const std::string SYMBOL_OUTPUT     = CREATE_SYMBOL_OUTPUT(state.LOCCTR, state.symmap, state.litmap);
     const std::string OPCODE_OUTPUT     = CREATE_OPCODE_OUTPUT(state.instruction.opCode, state.instruction.format);
-    const std::string ADDRESS_OUTPUT    = CREATE_ADDRESS_OUTPUT(ADDRESSMODES, OFFSETS, state.instruction.objectCode);
+    const std::string ADDRESS_OUTPUT    = CREATE_ADDRESS_OUTPUT(ADDRESSMODES, OFFSETS, state);
     const std::string OBJECT_OUTPUT     = CREATE_OBJECT_OUTPUT(state.instruction.objectCode);
     outputFile                          << Output{LOCCTR_OUTPUT, SYMBOL_OUTPUT, OPCODE_OUTPUT, ADDRESS_OUTPUT, OBJECT_OUTPUT};
 }
