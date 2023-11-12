@@ -34,6 +34,7 @@ const constexpr int INITIAL_BASE = 0;
 const constexpr char* OUTPUT_FILE_NAME = "out.lst";
 const constexpr bool FOUND_SYMBOL(int bytes) {return bytes > 0;}
 const constexpr bool STILL_MORE_BYTES(int bytes) {return bytes > 0;}
+const constexpr bool IS_POSITIVE(int number) {return number > 0;}
 const int BYTES_IN_HEX_STRING(const std::string& hex_str) {return hex_str.size() / NUMBER_OF_HEX_CHARS_IN_ONE_BYTE;}
 ///////////////////////////////////////////////////////////
 
@@ -89,7 +90,7 @@ const int handleInstruction(DisassemblerContext& context, const int LOCCTR)
  
 // This recursive function will allow us to avoid mutable state while looping through text file.
 // It will Naturally keep track of the LOCCTR because the handle symbol and handle instruction functions return bytes traversed
-void recurseTextSection(DisassemblerContext& context, const int textBytesRemaining, const int LOCCTR) 
+int32_t recurseTextSection(DisassemblerContext& context, const int textBytesRemaining, const int LOCCTR) 
 {  
     if (STILL_MORE_BYTES(textBytesRemaining)) {
         int bytesTraversed;
@@ -99,8 +100,9 @@ void recurseTextSection(DisassemblerContext& context, const int textBytesRemaini
         else {
             bytesTraversed = handleInstruction(context, LOCCTR);
         }
-        recurseTextSection(context, textBytesRemaining-bytesTraversed, LOCCTR+bytesTraversed);
+        return recurseTextSection(context, textBytesRemaining-bytesTraversed, LOCCTR+bytesTraversed);
     }
+    else return LOCCTR; 
 }
 
 // Set up input/output files and traverse input instructions
@@ -116,9 +118,12 @@ int main(const int argc, const char* argv[])
 
     DisassemblerContext                     context{inputFile, outputFile, registers, symmap, litmap, parser, INITIAL_BASE};
 
+    int32_t lastTextSectionEnd = 0;
     while (!inputFile.eof()) {
         const TextSectionDescriptor descriptor = FileHandling::locateTextSection(inputFile);
-        recurseTextSection(context, descriptor.textSectionSize, descriptor.LOCCTR_START);  
+        const int32_t sectionGap = descriptor.LOCCTR_START - lastTextSectionEnd; 
+        if (IS_POSITIVE(sectionGap)) HANDLE_RESB_DIRECTIVE(sectionGap, lastTextSectionEnd, context); 
+        lastTextSectionEnd = recurseTextSection(context, descriptor.textSectionSize, descriptor.LOCCTR_START);  
     }   
 
     FileHandling::printEnd(outputFile, FileHandling::getProgramName(argv[INPUT_FILE_ARG_NUMBER]));

@@ -71,6 +71,7 @@ const std::string CREATE_SYMBOL_OUTPUT(const int LOCCTR, const SYMMAP& symmap, c
 const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const AddressingFormat format);
 const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const DisassemblerState& state);
 const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode);
+void HANDLE_RESB_DIRECTIVE(const int32_t sectionGap, const int32_t LOCCTR, const DisassemblerContext& context);
 
 std::ostream& operator<<(std::ostream& stream, const AddressingMode addressingMode);
 

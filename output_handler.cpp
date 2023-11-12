@@ -26,6 +26,7 @@ const constexpr char* FIRST_DIRECTIVE =  "FIRST";
 const constexpr char* BASE_DIRECTIVE =  "BASE";
 const constexpr char* BYTE_DIRECTIVE = "BYTE";
 const constexpr char* LITERAL_DIRECTIVE = "*";
+const constexpr char* RESB_DIRECTIVE = "RESB";
 const constexpr char* LDB_INSTRUCTION =  "LDB";
 const constexpr char* END_DIRECTIVE =  "END";
 
@@ -234,6 +235,20 @@ const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, co
     const std::string tableLabel = findLabel(tableAddress, state.symmap, state.litmap);
     const std::string label = tableLabel==EMPTY_STRING ? address : tableLabel;
     return prependAddressMode(addressingInfo.addressingMode, label);
+}
+
+void HANDLE_RESB_DIRECTIVE(const int32_t sectionGap, const int32_t LOCCTR, const DisassemblerContext& context)
+{
+    context.outputFile << 
+    Output
+    {
+        CREATE_LOCCTR_OUTPUT(LOCCTR), 
+        CREATE_SYMBOL_OUTPUT(LOCCTR, context.symmap, context.litmap), 
+        RESB_DIRECTIVE, 
+        std::to_string(sectionGap),
+        EMPTY_STRING 
+    };
+
 }
 
 // No manipulations but keep our main function consistent
