@@ -77,3 +77,18 @@ std::string Parser::readInFullInstruction(std::ifstream& stream, const std::stri
 {
     return firstTwelveBits + FileHandling::readInBytes(stream, static_cast<int>(format)-TWO_BYTES, PLUS_HALF_BYTE); // static cast format gives value between 2 and 4
 }
+
+std::map<int, std::string> REGISTERS()
+{
+    return std::map<int, std::string>
+    {
+        {0, "A"},
+        {1, "X"},
+        {2, "L"},
+        {3, "B"},
+        {4, "S"},
+        {5, "T"},
+        {6, "F"},
+        {8, "PC"}
+    };
+}

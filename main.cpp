@@ -81,7 +81,7 @@ const int handleSymbol(const DisassemblerContext& context, const int LOCCTR)
 const int handleInstruction(DisassemblerContext& context, const int LOCCTR)
 {
     const ParsingResult parseResult = parseInstruction(context.inputFile, context.parser);
-    const DisassemblerState state = DisassemblerState{context.baseAddress, LOCCTR, parseResult.instruction, context.symmap, context.litmap};
+    const DisassemblerState state = DisassemblerState{context.baseAddress, LOCCTR, parseResult.instruction, context.registers, context.symmap, context.litmap};
     generateOutput(state, parseResult.bytesReadIn, context.outputFile); 
     FileHandling::handleBaseDirective(parseResult.instruction.opCode, parseResult.instruction.objectCode, context);
     return parseResult.bytesReadIn;
@@ -109,14 +109,15 @@ int main(const int argc, const char* argv[])
     std::ifstream inputFile                 = FileHandling::openFile(argv[INPUT_FILE_ARG_NUMBER]);
     std::ofstream outputFile                (OUTPUT_FILE_NAME);       
     const auto symbolEntries                = printHeader(argv, outputFile);          
-    const auto literals                     = GET_LITERALS(symbolEntries);
     const LITMAP litmap                     = CREATE_LITMAP(symbolEntries);
     const SYMMAP symmap                     = CREATE_SYMMAP(symbolEntries);
+    const REGMAP registers                  = REGISTERS();
     const Parser parser;
-    DisassemblerContext                     context{inputFile, outputFile, symmap, litmap, parser, INITIAL_BASE};
+
+    DisassemblerContext                     context{inputFile, outputFile, registers, symmap, litmap, parser, INITIAL_BASE};
 
     while (!inputFile.eof()) {
-        const TextSectionDescriptor descriptor = FileHandling::locateTextSection(inputFile); 
+        const TextSectionDescriptor descriptor = FileHandling::locateTextSection(inputFile);
         recurseTextSection(context, descriptor.textSectionSize, descriptor.LOCCTR_START);  
     }   
 

@@ -230,6 +230,7 @@ const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, co
 {
     const std::string address = getAddress(addressingInfo.targetAddressMode, state.instruction.objectCode, offsetInfo);
     const int32_t tableAddress = hexStringToInt(address);
+    if (state.instruction.format == AddressingFormat::Format2) return state.registers.find(tableAddress)->second;
     const std::string tableLabel = findLabel(tableAddress, state.symmap, state.litmap);
     const std::string label = tableLabel==EMPTY_STRING ? address : tableLabel;
     return prependAddressMode(addressingInfo.addressingMode, label);

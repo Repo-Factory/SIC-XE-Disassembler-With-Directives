@@ -42,4 +42,6 @@ class Parser
         std::unique_ptr<InstructionBindings> instructionBindings;
 };
 
+std::map<int32_t, std::string> REGISTERS();
+
 #endif
