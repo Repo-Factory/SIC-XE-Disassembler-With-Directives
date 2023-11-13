@@ -27,6 +27,7 @@ const constexpr char* BASE_DIRECTIVE =  "BASE";
 const constexpr char* BYTE_DIRECTIVE = "BYTE";
 const constexpr char* LITERAL_DIRECTIVE = "*";
 const constexpr char* RESB_DIRECTIVE = "RESB";
+const constexpr char* LTORG_DIRECTIVE = "LTORG";
 const constexpr char* LDB_INSTRUCTION =  "LDB";
 const constexpr char* END_DIRECTIVE =  "END";
 
@@ -44,6 +45,7 @@ const std::string XSpaces(const int X)
 
 const std::string pad(const std::string& word)
 {
+    if (word.empty()) return word;
     if (word.size() == NUMBER_PRINTOUT_SIZE)
         return word;
     else if (word.size() > NUMBER_PRINTOUT_SIZE)
@@ -79,11 +81,12 @@ const SymbolEntries printHeader(const char* argv[], std::ofstream& outputFile)
 }
 
 // This will be create the appropriate output for a symbol
-void outputSymbol(const DisassemblerContext& context, const int LOCCTR, const LITTAB_Entry& entry, std::ofstream& outputFile)
+void outputSymbol(DisassemblerContext& context, const int LOCCTR, const LITTAB_Entry& entry, std::ofstream& outputFile)
 {   
     const bool IS_LITERAL = entry.lit_const.front() == '='; 
     if(IS_LITERAL)
     {
+        OUTPUT_LTORG(context);
         outputFile << 
         Output
         {
@@ -140,7 +143,7 @@ void FileHandling::handleBaseDirective(const std::string& opcode, const std::str
         << appendWord(EMPTY_STRING)
         << appendWord(EMPTY_STRING)
         << appendWord(BASE_DIRECTIVE) 
-        << appendWord(pad(intToHexString(context.baseAddress)))  
+        << appendWord(CREATE_SYMBOL_OUTPUT(context.baseAddress, context.symmap, context.litmap))  
         << std::endl;
     }          
 }
@@ -235,6 +238,21 @@ const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, co
     const std::string tableLabel = findLabel(tableAddress, state.symmap, state.litmap);
     const std::string label = tableLabel==EMPTY_STRING ? address : tableLabel;
     return prependAddressMode(addressingInfo.addressingMode, label);
+}
+
+void OUTPUT_LTORG(DisassemblerContext& context)
+{
+    if (context.LTORG) return;
+    context.outputFile << 
+    Output
+    {
+        EMPTY_STRING,
+        EMPTY_STRING,
+        LTORG_DIRECTIVE,
+        EMPTY_STRING,
+        EMPTY_STRING, 
+    };
+    context.LTORG = true;
 }
 
 void HANDLE_RESB_DIRECTIVE(const int32_t sectionGap, const int32_t LOCCTR, const DisassemblerContext& context)

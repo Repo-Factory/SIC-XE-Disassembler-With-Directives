@@ -19,7 +19,7 @@ namespace FileHandling
 
 const std::string prependString(const std::string& prependStr, const std::string& str);
 const SymbolEntries printHeader(const char* argv[], std::ofstream& outputFile);
-void outputSymbol(const DisassemblerContext& context, const int LOCCTR, const LITTAB_Entry& entry, std::ofstream& outputFile);
+void outputSymbol(DisassemblerContext& context, const int LOCCTR, const LITTAB_Entry& entry, std::ofstream& outputFile);
 
 struct AddressingInfo
 {
@@ -72,6 +72,7 @@ const std::string CREATE_OPCODE_OUTPUT(const std::string& opcode, const Addressi
 const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, const OffsetInfo& offsetInfo, const DisassemblerState& state);
 const std::string CREATE_OBJECT_OUTPUT(const std::string& objectCode);
 void HANDLE_RESB_DIRECTIVE(const int32_t sectionGap, const int32_t LOCCTR, const DisassemblerContext& context);
+void OUTPUT_LTORG(DisassemblerContext& context);
 
 std::ostream& operator<<(std::ostream& stream, const AddressingMode addressingMode);
 

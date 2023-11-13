@@ -19,6 +19,7 @@ struct DisassemblerContext
     const LITMAP& litmap;
     const Parser& parser;
     int baseAddress;
+    bool LTORG;
 };
 
 struct DisassemblerState

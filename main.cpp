@@ -69,7 +69,7 @@ PrintToConsole generateOutput(const DisassemblerState& state, const int bytesRea
 // The disassembler will behave differently if it's a symbol instead of an instruction
 // here it will have to look for an entry in the table and find and output the appropriate information
 // like the handle instruction function it will also have to keep track of the amount of bytes traversed
-const int handleSymbol(const DisassemblerContext& context, const int LOCCTR)
+const int handleSymbol(DisassemblerContext& context, const int LOCCTR)
 {
     const LITTAB_Entry entry = context.litmap.find(LOCCTR)->second;
     const int labelBytes = std::stoi(entry.length)/NUMBER_OF_HEX_CHARS_IN_ONE_BYTE;
@@ -116,7 +116,7 @@ int main(const int argc, const char* argv[])
     const REGMAP registers                  = REGISTERS();
     const Parser parser;
 
-    DisassemblerContext                     context{inputFile, outputFile, registers, symmap, litmap, parser, INITIAL_BASE};
+    DisassemblerContext                     context{inputFile, outputFile, registers, symmap, litmap, parser, INITIAL_BASE, false};
 
     int32_t lastTextSectionEnd = 0;
     while (!inputFile.eof()) {
