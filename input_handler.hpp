@@ -10,6 +10,7 @@ struct TextSectionDescriptor
 {
     int LOCCTR_START;
     int textSectionSize;
+    bool sectionFound;
 };
 
 namespace FileHandling

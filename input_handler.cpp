@@ -75,10 +75,11 @@ TextSectionDescriptor FileHandling::locateTextSection(std::ifstream& stream)
 {
     while (stream.peek() != TEXT_SECTION_IDENTIFIER && !stream.eof())                       // Read in lines until we see T
         readInLine(stream);
+    if (stream.eof()) return TextSectionDescriptor{0, 0, false};
     readInChar(stream);                                                                     // Grab 'T'
     const int LOCCTR = hexStringToInt(readInBytes(stream, NUM_ADDRESS_DESCRIPTION_BYTES));  // Read in 3 descriptor bytes
     const int TEXT_SIZE = convertStringToHex(readInByte(stream));
-    return TextSectionDescriptor{LOCCTR, TEXT_SIZE};                                        // Read in next byte and return the size it indicates
+    return TextSectionDescriptor{LOCCTR, TEXT_SIZE, true};                                        // Read in next byte and return the size it indicates
 }   // This will place you at beginning of instructions
 
 // Read in header record for program name

@@ -20,6 +20,7 @@
 #include "byte_operations.hpp"
 #include <fstream>
 #include <iostream>
+#include <math.h>
 
 ////////////////////////////////////////////////////////////
 using PrintToConsole = void;
@@ -56,7 +57,7 @@ ParsingResult parseInstruction(std::ifstream& inputFile, const Parser& parser)
 // to be able to output to our text file the correct information
 PrintToConsole generateOutput(const DisassemblerState& state, const int bytesReadIn, std::ofstream& outputFile)
 {
-    const AddressingInfo ADDRESSMODES   {state.instruction.addresingMode, state.instruction.targetAddressMode};
+    const AddressingInfo ADDRESSMODES   {state.instruction.addresingMode, state.instruction.targetAddressMode, state.instruction.isIndexed};
     const OffsetInfo  OFFSETS           {state.BASE, state.LOCCTR + bytesReadIn};
     const std::string LOCCTR_OUTPUT     = CREATE_LOCCTR_OUTPUT(state.LOCCTR);
     const std::string SYMBOL_OUTPUT     = CREATE_SYMBOL_OUTPUT(state.LOCCTR, state.symmap, state.litmap);
@@ -105,12 +106,35 @@ int32_t recurseTextSection(DisassemblerContext& context, const int textBytesRema
     else return LOCCTR; 
 }
 
+int getNextSymbolGap(const int start, const int end, const SYMMAP& symmap)
+{
+    int i = 1;
+    while (symmap.find(i+start) == symmap.end())
+    {
+        if (i == end) 
+            return i;
+        i++;
+    }
+    return i;
+}
+
+void fillGap(const int sectionGap, const int lastTextSectionEnd, const SYMMAP& symmap, const DisassemblerContext& context)
+{
+    int i = 0;
+    while (i < sectionGap)
+    {
+        if (symmap.find(i+lastTextSectionEnd) !=  symmap.end()) 
+            HANDLE_RESB_DIRECTIVE(getNextSymbolGap(i+lastTextSectionEnd, sectionGap-i, symmap), lastTextSectionEnd+i, context);
+        i++;
+    } 
+} 
+
 // Set up input/output files and traverse input instructions
 int main(const int argc, const char* argv[])
 {
     std::ifstream inputFile                 = FileHandling::openFile(argv[INPUT_FILE_ARG_NUMBER]);
     std::ofstream outputFile                (OUTPUT_FILE_NAME);       
-    const auto symbolEntries                = printHeader(argv, outputFile);          
+    const SymbolEntries symbolEntries       = printHeader(argv, outputFile);          
     const LITMAP litmap                     = CREATE_LITMAP(symbolEntries);
     const SYMMAP symmap                     = CREATE_SYMMAP(symbolEntries);
     const REGMAP registers                  = REGISTERS();
@@ -122,10 +146,13 @@ int main(const int argc, const char* argv[])
     while (!inputFile.eof()) {
         const TextSectionDescriptor descriptor = FileHandling::locateTextSection(inputFile);
         const int32_t sectionGap = descriptor.LOCCTR_START - lastTextSectionEnd; 
-        if (IS_POSITIVE(sectionGap)) HANDLE_RESB_DIRECTIVE(sectionGap, lastTextSectionEnd, context); 
-        lastTextSectionEnd = recurseTextSection(context, descriptor.textSectionSize, descriptor.LOCCTR_START);  
+        fillGap(sectionGap, lastTextSectionEnd, symmap, context);
+        if (descriptor.sectionFound) lastTextSectionEnd = recurseTextSection(context, descriptor.textSectionSize, descriptor.LOCCTR_START);   
     }   
+    fillGap(hexStringToInt(symbolEntries.SYMTAB[symbolEntries.SYMTAB.size()-1].address), lastTextSectionEnd, symmap, context);
 
     FileHandling::printEnd(outputFile, FileHandling::getProgramName(argv[INPUT_FILE_ARG_NUMBER]));
     return FileHandling::close(inputFile, outputFile); 
 }
+
+// |*           * |

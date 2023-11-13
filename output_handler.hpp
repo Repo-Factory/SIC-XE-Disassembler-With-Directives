@@ -25,6 +25,7 @@ struct AddressingInfo
 {
     const AddressingMode addressingMode;
     const TargetAddressMode targetAddressMode;
+    const bool is_indexed;
 };
 
 struct OffsetInfo

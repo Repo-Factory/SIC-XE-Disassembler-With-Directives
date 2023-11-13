@@ -236,8 +236,9 @@ const std::string CREATE_ADDRESS_OUTPUT(const AddressingInfo& addressingInfo, co
     const int32_t tableAddress = hexStringToInt(address);
     if (state.instruction.format == AddressingFormat::Format2) return state.registers.find(tableAddress)->second;
     const std::string tableLabel = findLabel(tableAddress, state.symmap, state.litmap);
-    const std::string label = tableLabel==EMPTY_STRING ? address : tableLabel;
-    return prependAddressMode(addressingInfo.addressingMode, label);
+    const std::string label = tableLabel==EMPTY_STRING ||tableLabel==FIRST_DIRECTIVE ? address : tableLabel;
+    const std::string indexed = addressingInfo.is_indexed ? ",X" : "";
+    return prependAddressMode(addressingInfo.addressingMode, label) + indexed;
 }
 
 void OUTPUT_LTORG(DisassemblerContext& context)
